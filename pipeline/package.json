@@ -1,0 +1,15 @@
+{
+  "name": "headlines-pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local content pipeline: fetch NYT headlines, curate, and schedule daily rounds. Not shipped to players.",
+  "type": "module",
+  "scripts": {
+    "fetch-nyt": "node src/fetch-nyt.js",
+    "curate": "node src/curate.js",
+    "schedule-rounds": "node src/schedule-rounds.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
