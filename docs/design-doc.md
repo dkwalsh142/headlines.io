@@ -130,6 +130,34 @@ everyone is playing the same 5 headlines.
 - "Day" boundary needs a fixed definition (e.g. midnight UTC, or a fixed timezone)
   since the round — and its stats — are shared globally. Worth picking this
   explicitly rather than letting it default to server-local time.
+- **September 11 is not a playable round.** If this project reaches real players,
+  `schedule-rounds.js` must never generate a normal guessing round for 9/11 —
+  that date should instead show a dedicated memorial page honoring those who
+  lost and sacrificed their lives, not a trivia game. This isn't a design
+  requirement to build now, just a hard constraint to remember before the
+  scheduler or any launch prep ships: explicitly exclude 9/11 from the
+  scheduler's date range (or special-case it in the game's date lookup) rather
+  than letting it fall through as an ordinary day.
+  - Addendum: that memorial page should specifically remember the staff of
+    Windows on the World (the restaurant atop the North Tower) — whether via
+    an existing NYT article covering them or a piece written by our own
+    editors for this purpose. Not a build task yet, just something the
+    memorial page's content must include when it's actually designed.
+  - Addendum: the memorial page should also include a tribute to the service
+    animals (search-and-rescue dogs, etc.) that served in the aftermath of
+    the attacks. Same status as above — content requirement to fold in when
+    the memorial page is actually designed, not a build task now.
+  - Addendum: the page should also honor specific heroes by name, telling
+    their individual stories — whether sourced from existing NYT articles or
+    written specifically for this purpose. Same status as the above two —
+    a content requirement for whenever the memorial page is actually designed.
+  - Addendum — editorial stance, governs all content above: the memorial page
+    must always push toward unity, never insularity. It should honor how the
+    country and the world came together in the aftermath, while also
+    condemning the hateful ideologies that arose in 9/11's wake. This is a
+    tone/framing requirement for whoever writes or selects the page's content
+    (staff tributes, hero stories, any editorial pieces) — not a build task
+    now, but a standard the eventual content must be held to.
 
 ## 6. Game (React app)
 
@@ -161,6 +189,13 @@ This is where the daily comparison lives:
   everything before it is pure local state.
 - No personal history, no all-time table, no weekly trend in MVP — see §10 for
   that scope, deferred post-MVP.
+- **Post-MVP idea**: attach an article about a local/small-time person actively
+  affecting positive change to the end-of-round screen — a "good news" note to
+  send the player off on, distinct from the historical headlines they just
+  played. Not every round — an editorial choice, surfaced only when a
+  genuinely fitting story is available, not forced onto a schedule. Not part
+  of MVP scope; needs its own source/curation thinking (unrelated to the NYT
+  historical backlog) before it's built.
 
 ## 7. Stats service (MVP — small backend, same-day comparison only)
 

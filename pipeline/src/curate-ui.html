@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Headline Curation</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f7f5f0;
+    --card-bg: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #dedad2;
+    --accent: #1a5fb4;
+    --approve: #2e7d32;
+    --reject: #c62828;
+    --skip: #8a8a8a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17171a;
+      --card-bg: #232326;
+      --text: #eeeeee;
+      --muted: #9a9a9a;
+      --border: #38383c;
+      --accent: #6fa8f5;
+      --approve: #5fbf6a;
+      --reject: #f26d6d;
+      --skip: #9a9a9a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 24px 16px 64px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.1rem; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+  .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+  select, button {
+    font: inherit;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  .progress { color: var(--muted); font-size: 0.85rem; margin-left: auto; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    min-height: 180px;
+  }
+  .year {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .headline { font-size: 1.4rem; font-weight: 600; line-height: 1.35; margin-bottom: 14px; }
+  .llm-note {
+    display: flex; align-items: baseline; gap: 8px;
+    font-size: 0.82rem; color: var(--muted);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-radius: 8px; padding: 8px 10px; margin-bottom: 14px;
+  }
+  .llm-score { font-weight: 700; color: var(--accent); flex: none; }
+  .meta { color: var(--muted); font-size: 0.85rem; display: flex; gap: 10px; flex-wrap: wrap; }
+  .meta a { color: var(--accent); }
+  .empty { color: var(--muted); text-align: center; padding: 60px 0; }
+  .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 22px 0 8px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .grid button { min-width: 44px; }
+  .grid button.selected { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .actions { display: flex; gap: 10px; margin-top: 26px; }
+  .actions button { flex: 1; padding: 12px; font-weight: 600; font-size: 0.95rem; }
+  #approveBtn { border-color: var(--approve); color: var(--approve); }
+  #approveBtn.ready { background: var(--approve); color: #fff; }
+  #rejectBtn { border-color: var(--reject); color: var(--reject); }
+  #skipBtn { color: var(--skip); }
+  .hint { color: var(--muted); font-size: 0.78rem; margin-top: 10px; }
+  kbd {
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 0 5px;
+    font-size: 0.8em;
+    font-family: inherit;
+  }
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 18px; font-size: 0.85rem; opacity: 0; transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  .filters {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; margin-bottom: 14px; font-size: 0.85rem;
+  }
+  .filters-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .filters-toggle {
+    background: none; border: none; color: var(--muted); font: inherit;
+    cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 2px;
+  }
+  .filters-body { margin-top: 10px; }
+  .filters-body[hidden] { display: none; }
+  .filter-group { margin-bottom: 10px; }
+  .filter-group label { display: block; color: var(--muted); font-size: 0.75rem; margin-bottom: 4px; }
+  .year-inputs { display: flex; align-items: center; gap: 6px; }
+  .year-inputs input {
+    width: 80px; font: inherit; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); padding: 5px 8px;
+  }
+  .chip-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font: inherit; font-size: 0.8rem; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); padding: 4px 12px; cursor: pointer;
+  }
+  .chip.selected { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .filters-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .filters-actions button { font-size: 0.8rem; padding: 6px 12px; }
+  .approved-breakdown {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.78rem; color: var(--muted);
+  }
+  .approved-breakdown b { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Headline Curation</h1>
+  <div class="sub">Review raw NYT headlines, approve with a difficulty + section, or reject/skip.</div>
+
+  <div class="toolbar">
+    <span class="progress" id="progress"></span>
+  </div>
+
+  <div class="filters">
+    <div class="filters-row">
+      <button class="filters-toggle" id="filtersToggle">Filters</button>
+    </div>
+    <div class="filters-body" id="filtersBody" hidden>
+      <div class="filter-group">
+        <label>Year range</label>
+        <div class="year-inputs">
+          <input type="number" id="yearMinInput" placeholder="min" />
+          <span>–</span>
+          <input type="number" id="yearMaxInput" placeholder="max" />
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Section</label>
+        <div class="chip-grid" id="filterSectionGrid"></div>
+      </div>
+      <div class="filters-actions">
+        <button id="applyFiltersBtn">Apply</button>
+        <button id="clearFiltersBtn">Clear</button>
+      </div>
+    </div>
+    <div class="approved-breakdown" id="approvedBreakdown"></div>
+    <div class="approved-breakdown" id="approvedByDecade"></div>
+  </div>
+
+  <div id="card" class="card"></div>
+
+  <div id="controls" hidden>
+    <div class="section-title">Difficulty</div>
+    <div class="grid" id="difficultyGrid"></div>
+
+    <div class="section-title">Section</div>
+    <div class="grid" id="sectionGrid"></div>
+
+    <div class="actions">
+      <button id="rejectBtn" title="Reject (r)">Reject</button>
+      <button id="skipBtn" title="Skip (s)">Skip</button>
+      <button id="approveBtn" title="Approve (a or Enter)">Approve</button>
+    </div>
+    <div class="hint">
+      <kbd>1</kbd>-<kbd>5</kbd> difficulty · <kbd>a</kbd> approve · <kbd>r</kbd> reject · <kbd>s</kbd> skip
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const state = {
+  queue: [],
+  total: 0,
+  approvedCount: 0,
+  approvedBySection: {},
+  approvedByDecade: {},
+  pendingCount: 0,
+  autoRejectedCount: 0,
+  manualRejectedCount: 0,
+  unscoredCount: 0,
+  current: null,
+  difficulty: null,
+  section: null,
+  filters: { yearMin: null, yearMax: null, sections: [] },
+};
+
+const els = {
+  progress: document.getElementById('progress'),
+  card: document.getElementById('card'),
+  controls: document.getElementById('controls'),
+  difficultyGrid: document.getElementById('difficultyGrid'),
+  sectionGrid: document.getElementById('sectionGrid'),
+  approveBtn: document.getElementById('approveBtn'),
+  rejectBtn: document.getElementById('rejectBtn'),
+  skipBtn: document.getElementById('skipBtn'),
+  toast: document.getElementById('toast'),
+  filtersToggle: document.getElementById('filtersToggle'),
+  filtersBody: document.getElementById('filtersBody'),
+  yearMinInput: document.getElementById('yearMinInput'),
+  yearMaxInput: document.getElementById('yearMaxInput'),
+  filterSectionGrid: document.getElementById('filterSectionGrid'),
+  applyFiltersBtn: document.getElementById('applyFiltersBtn'),
+  clearFiltersBtn: document.getElementById('clearFiltersBtn'),
+  approvedBreakdown: document.getElementById('approvedBreakdown'),
+  approvedByDecade: document.getElementById('approvedByDecade'),
+};
+
+let SECTIONS = [];
+
+function showToast(msg) {
+  els.toast.textContent = msg;
+  els.toast.classList.add('show');
+  setTimeout(() => els.toast.classList.remove('show'), 1200);
+}
+
+function buildPendingUrl() {
+  const params = new URLSearchParams();
+  if (state.filters.yearMin != null) params.set('yearMin', state.filters.yearMin);
+  if (state.filters.yearMax != null) params.set('yearMax', state.filters.yearMax);
+  if (state.filters.sections.length) params.set('sections', state.filters.sections.join(','));
+  const qs = params.toString();
+  return qs ? `/api/pending?${qs}` : '/api/pending';
+}
+
+async function loadPending() {
+  const res = await fetch(buildPendingUrl());
+  const data = await res.json();
+  if (!res.ok) {
+    els.card.innerHTML = `<div class="empty">${data.error}</div>`;
+    els.controls.hidden = true;
+    return;
+  }
+  if (!data.years.length) {
+    els.card.innerHTML = `<div class="empty">No raw data yet — run fetch-nyt.js for at least one year first.</div>`;
+    els.controls.hidden = true;
+    return;
+  }
+  SECTIONS = data.sections;
+  state.queue = data.pending;
+  state.total = data.total;
+  state.approvedCount = data.approvedCount;
+  state.approvedBySection = data.approvedBySection ?? {};
+  state.approvedByDecade = data.approvedByDecade ?? {};
+  state.pendingCount = data.pendingCount;
+  state.autoRejectedCount = data.autoRejectedCount ?? 0;
+  state.manualRejectedCount = data.manualRejectedCount ?? 0;
+  state.unscoredCount = data.unscoredCount ?? 0;
+  renderSectionGrid();
+  renderFilterSectionGrid();
+  renderApprovedBreakdown();
+  next();
+}
+
+function renderSectionGrid() {
+  els.sectionGrid.innerHTML = SECTIONS.map(
+    (s) => `<button data-section="${s}">${s}</button>`
+  ).join('');
+}
+
+function renderFilterSectionGrid() {
+  els.filterSectionGrid.innerHTML = SECTIONS.map(
+    (s) => `<button type="button" class="chip${state.filters.sections.includes(s) ? ' selected' : ''}" data-filter-section="${s}">${s}</button>`
+  ).join('');
+}
+
+function renderApprovedBreakdown() {
+  els.approvedBreakdown.innerHTML = SECTIONS.map((s) => `<span>${s}: <b>${state.approvedBySection[s] ?? 0}</b></span>`).join('');
+
+  const decades = Object.keys(state.approvedByDecade).sort((a, b) => parseInt(a) - parseInt(b));
+  els.approvedByDecade.innerHTML = decades.length
+    ? decades.map((d) => `<span>${d}: <b>${state.approvedByDecade[d]}</b></span>`).join('')
+    : '<span>No approved headlines yet</span>';
+}
+
+function updateProgress() {
+  const rejectedNote = state.autoRejectedCount ? ` · ${state.autoRejectedCount} auto-hidden` : '';
+  const manualRejectedNote = state.manualRejectedCount ? ` · ${state.manualRejectedCount} rejected` : '';
+  const unscoredNote = state.unscoredCount ? ` · ${state.unscoredCount} awaiting scoring` : '';
+  const filterNote = (state.filters.yearMin != null || state.filters.yearMax != null || state.filters.sections.length)
+    ? ' · filtered' : '';
+  els.progress.textContent = `${state.approvedCount} approved · ${state.pendingCount} pending (of ${state.total})${rejectedNote}${manualRejectedNote}${unscoredNote}${filterNote}`;
+}
+
+function resetSelection() {
+  state.difficulty = null;
+  state.section = null;
+  [...els.difficultyGrid.children].forEach((b) => b.classList.remove('selected'));
+  [...els.sectionGrid.children].forEach((b) => b.classList.remove('selected'));
+  updateApproveReadiness();
+}
+
+function updateApproveReadiness() {
+  const ready = state.difficulty !== null && state.section !== null;
+  els.approveBtn.classList.toggle('ready', ready);
+}
+
+function yearOf(record) {
+  const year = Number(String(record.pubDate).slice(0, 4));
+  return Number.isFinite(year) ? year : '????';
+}
+
+function next() {
+  updateProgress();
+  resetSelection();
+  state.current = state.queue.shift() || null;
+
+  if (!state.current) {
+    const message = state.unscoredCount
+      ? `Nothing to review right now — ${state.unscoredCount} headline${state.unscoredCount === 1 ? '' : 's'} still awaiting LLM scoring. Run score-headlines.js, or check back once scoring finishes.`
+      : `No more pending headlines. Run fetch-nyt.js for more years.`;
+    els.card.innerHTML = `<div class="empty">${message}</div>`;
+    els.controls.hidden = true;
+    return;
+  }
+
+  els.controls.hidden = false;
+  const r = state.current;
+  const llmNote = r.interestScore != null
+    ? `<div class="llm-note"><span class="llm-score">${r.interestScore}/5</span><span>${escapeHtml(r.whyInteresting ?? '')}</span></div>`
+    : '';
+  els.card.innerHTML = `
+    <div class="year">${yearOf(r)}</div>
+    ${llmNote}
+    <div class="headline">${escapeHtml(r.text)}</div>
+    <div class="meta">
+      <span>${r.pubDate ?? ''}</span>
+      <span>${escapeHtml(r.section ?? 'unknown section')}</span>
+      <a href="${r.sourceUrl}" target="_blank" rel="noopener">source ↗</a>
+    </div>
+  `;
+
+  // Pre-select the model's suggested section as a starting point — still
+  // just a suggestion, the reviewer can click a different one before approving.
+  if (r.suggestedSection && SECTIONS.includes(r.suggestedSection)) {
+    state.section = r.suggestedSection;
+    [...els.sectionGrid.children].forEach((b) => b.classList.toggle('selected', b.dataset.section === r.suggestedSection));
+    updateApproveReadiness();
+  }
+
+  // Re-fetch when the local queue gets low so we don't run out mid-session.
+  if (state.queue.length < 5 && state.pendingCount > state.queue.length + 1) {
+    fetch(buildPendingUrl()).then((r) => r.json()).then((data) => {
+      if (data.pending) state.queue = data.pending.filter((p) => p.nytId !== state.current?.nytId);
+    });
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str ?? '';
+  return div.innerHTML;
+}
+
+async function decide(action) {
+  if (!state.current) return;
+  if (action === 'approve' && (state.difficulty === null || state.section === null)) {
+    showToast('Pick a difficulty and section first');
+    return;
+  }
+
+  const res = await fetch('/api/decide', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action,
+      record: state.current,
+      difficulty: state.difficulty,
+      section: state.section,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    showToast(data.error || 'Something went wrong');
+    return;
+  }
+
+  if (action === 'approve') {
+    state.approvedCount = data.approvedCount ?? state.approvedCount + 1;
+    showToast('Approved');
+  } else {
+    showToast(action === 'reject' ? 'Rejected' : 'Skipped');
+  }
+  state.pendingCount = Math.max(0, state.pendingCount - 1);
+  next();
+}
+
+els.difficultyGrid.innerHTML = [1, 2, 3, 4, 5].map((d) => `<button data-difficulty="${d}">${d}</button>`).join('');
+
+els.difficultyGrid.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-difficulty]');
+  if (!btn) return;
+  state.difficulty = Number(btn.dataset.difficulty);
+  [...els.difficultyGrid.children].forEach((b) => b.classList.toggle('selected', b === btn));
+  updateApproveReadiness();
+});
+
+els.sectionGrid.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-section]');
+  if (!btn) return;
+  state.section = btn.dataset.section;
+  [...els.sectionGrid.children].forEach((b) => b.classList.toggle('selected', b === btn));
+  updateApproveReadiness();
+});
+
+els.approveBtn.addEventListener('click', () => decide('approve'));
+els.rejectBtn.addEventListener('click', () => decide('reject'));
+els.skipBtn.addEventListener('click', () => decide('skip'));
+
+els.filtersToggle.addEventListener('click', () => {
+  els.filtersBody.hidden = !els.filtersBody.hidden;
+});
+
+els.filterSectionGrid.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-filter-section]');
+  if (!btn) return;
+  const s = btn.dataset.filterSection;
+  const idx = state.filters.sections.indexOf(s);
+  if (idx === -1) state.filters.sections.push(s);
+  else state.filters.sections.splice(idx, 1);
+  btn.classList.toggle('selected');
+});
+
+els.applyFiltersBtn.addEventListener('click', () => {
+  const min = els.yearMinInput.value ? Number(els.yearMinInput.value) : null;
+  const max = els.yearMaxInput.value ? Number(els.yearMaxInput.value) : null;
+  state.filters.yearMin = min;
+  state.filters.yearMax = max;
+  loadPending();
+});
+
+els.clearFiltersBtn.addEventListener('click', () => {
+  state.filters = { yearMin: null, yearMax: null, sections: [] };
+  els.yearMinInput.value = '';
+  els.yearMaxInput.value = '';
+  loadPending();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key >= '1' && e.key <= '5') {
+    state.difficulty = Number(e.key);
+    [...els.difficultyGrid.children].forEach((b) => b.classList.toggle('selected', Number(b.dataset.difficulty) === state.difficulty));
+    updateApproveReadiness();
+  } else if (e.key === 'a' || e.key === 'Enter') {
+    decide('approve');
+  } else if (e.key === 'r') {
+    decide('reject');
+  } else if (e.key === 's') {
+    decide('skip');
+  }
+});
+
+loadPending();
+</script>
+</body>
+</html>

@@ -6,7 +6,12 @@
   "type": "module",
   "scripts": {
     "fetch-nyt": "node src/fetch-nyt.js",
+    "fetch-decades": "node src/fetch-decades.js",
+    "fetch-all-years": "node src/fetch-all-years.js",
     "curate": "node src/curate.js",
+    "curate-ui": "node src/curate-ui-server.js",
+    "score-headlines": "node src/score-headlines.js",
+    "score-decades": "node src/score-decades.js",
     "schedule-rounds": "node src/schedule-rounds.js"
   },
   "dependencies": {
