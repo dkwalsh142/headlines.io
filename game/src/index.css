@@ -1,0 +1,130 @@
+@font-face {
+  font-family: 'Alagard';
+  src: url('/fonts/alagard.ttf') format('truetype');
+  font-display: swap;
+}
+
+:root {
+  /* Pixel-art newsprint palette: aged paper + black ink + a red accent
+     stamp, the way a pulp-era newspaper masthead would print. */
+  --bg: #e8e0cc;
+  --card-bg: #f4efe0;
+  --text: #1c1a14;
+  --muted: #5b5645;
+  --ink: #1c1a14;
+  --accent: #b2231b;
+  --accent-bg: #f0d9ce;
+  --accent-text: #f4efe0;
+
+  --pixel: 3px; /* one "pixel" unit for borders/steps, scales with --px-scale below */
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --pixel-font: 'VT323', 'Courier New', monospace;
+  /* Display font for actual headline text (the news-story text itself, and
+     the masthead) — chunkier/more decorative than VT323, which stays on
+     small UI chrome (buttons, scores, labels) where a display face would
+     hurt legibility. */
+  --headline-font: 'Alagard', var(--pixel-font);
+
+  color-scheme: light;
+  font: 20px/1.4 var(--pixel-font);
+  color: var(--text);
+  background: var(--bg);
+  image-rendering: pixelated;
+}
+
+/* Deliberately no dark-mode palette swap: this is a fixed pulp-newsprint
+   look (aged paper + black ink), not a UI that should invert to a dark
+   theme — same design choice a real print reskin would make. */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.02) 0 1px, transparent 1px 3px);
+  background-color: var(--bg);
+}
+
+#root {
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 100svh;
+  padding: 24px 16px 64px;
+}
+
+h1 {
+  font-family: var(--headline-font);
+  font-size: 3.4rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+  color: var(--ink);
+  text-shadow: var(--pixel) var(--pixel) 0 var(--accent);
+}
+
+h2 {
+  font-family: var(--pixel-font);
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+p { margin: 0; }
+
+/* Stepped pixel border: stacked box-shadows draw a 2-step staircase corner
+   instead of a rounded one, the hallmark of pixel-art UI chrome. No image
+   asset — pure CSS so it scales with any box size/content. */
+.pixel-frame {
+  position: relative;
+  border: var(--pixel) solid var(--ink);
+  box-shadow:
+    calc(var(--pixel) * -1) 0 0 0 var(--ink),
+    var(--pixel) 0 0 0 var(--ink),
+    0 calc(var(--pixel) * -1) 0 0 var(--ink),
+    0 var(--pixel) 0 0 var(--ink);
+  margin: var(--pixel);
+}
+
+button {
+  font: inherit;
+  font-family: var(--pixel-font);
+  font-size: 1.15rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border: var(--pixel) solid var(--ink);
+  box-shadow:
+    calc(var(--pixel) * -1) 0 0 0 var(--ink),
+    var(--pixel) 0 0 0 var(--ink),
+    0 calc(var(--pixel) * -1) 0 0 var(--ink),
+    0 var(--pixel) 0 0 var(--ink);
+  margin: var(--pixel);
+  border-radius: 0;
+  background: var(--card-bg);
+  color: var(--ink);
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+button:hover { background: var(--accent-bg); }
+button:active { transform: translate(2px, 2px); }
+
+.primary-btn {
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 400;
+  width: 100%;
+  padding: 14px;
+  font-size: 1.3rem;
+}
+
+.primary-btn:hover { background: var(--accent); opacity: 0.85; }
+
+.state-message {
+  color: var(--muted);
+  padding: 40px 0;
+  text-align: center;
+  font-size: 1.3rem;
+}

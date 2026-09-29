@@ -1,0 +1,166 @@
+.app-shell { display: flex; flex-direction: column; gap: 32px; }
+
+.today-section, .beta-section {
+  background: var(--card-bg);
+  padding: 20px;
+}
+
+.beta-note {
+  display: block;
+  color: var(--muted);
+  font-size: 1.05rem;
+  margin-bottom: 14px;
+  line-height: 1.35;
+}
+
+.round-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+
+.round-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--bg);
+  font-size: 1.1rem;
+}
+
+.rl-date { font-weight: 400; flex: none; }
+.rl-difficulty { color: var(--muted); font-size: 0.95rem; flex: none; }
+.rl-score { color: var(--accent); font-size: 0.95rem; margin-left: auto; }
+.round-list-item button { margin-left: auto; font-size: 1rem; padding: 6px 12px; }
+.round-list-item .rl-score + button { margin-left: 0; }
+
+/* --- Round player --- */
+
+.round-player { display: flex; flex-direction: column; gap: 20px; }
+
+.round-player-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-family: var(--pixel-font);
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.exit-btn {
+  all: unset;
+  cursor: pointer;
+  font-family: var(--pixel-font);
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--muted);
+  padding: 4px 8px;
+}
+.exit-btn:hover { color: var(--text); }
+
+.headline-card {
+  background: var(--card-bg);
+  padding: 32px 24px;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.headline-section {
+  align-self: flex-start;
+  font-family: var(--pixel-font);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-text);
+  background: var(--accent);
+  padding: 3px 10px;
+}
+
+.headline-text {
+  font-family: var(--headline-font);
+  font-size: 1.7rem;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.guess-form { display: flex; gap: 12px; }
+
+.guess-form input {
+  flex: 1;
+  font: inherit;
+  font-family: var(--pixel-font);
+  font-size: 1.6rem;
+  text-align: center;
+  border: var(--pixel) solid var(--ink);
+  box-shadow:
+    calc(var(--pixel) * -1) 0 0 0 var(--ink),
+    var(--pixel) 0 0 0 var(--ink),
+    0 calc(var(--pixel) * -1) 0 0 var(--ink),
+    0 var(--pixel) 0 0 var(--ink);
+  margin: var(--pixel);
+  background: var(--card-bg);
+  color: var(--text);
+  padding: 10px;
+  outline: none;
+}
+
+.guess-form input:focus {
+  box-shadow:
+    calc(var(--pixel) * -1) 0 0 0 var(--accent),
+    var(--pixel) 0 0 0 var(--accent),
+    0 calc(var(--pixel) * -1) 0 0 var(--accent),
+    0 var(--pixel) 0 0 var(--accent);
+}
+
+.guess-form .primary-btn { width: auto; flex: none; padding: 10px 24px; }
+
+.reveal {
+  background: var(--card-bg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+
+.reveal-row { display: flex; justify-content: space-between; font-family: var(--pixel-font); font-size: 1.4rem; color: var(--muted); }
+
+.reveal-points { font-family: var(--pixel-font); font-size: 2.2rem; color: var(--accent); }
+
+/* --- Round complete --- */
+
+.round-complete { display: flex; flex-direction: column; gap: 18px; text-align: center; }
+
+.total-score {
+  font-family: var(--pixel-font);
+  font-size: 3.2rem;
+  color: var(--accent);
+  text-shadow: var(--pixel) var(--pixel) 0 var(--ink);
+}
+
+.result-breakdown { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+
+.result-breakdown li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 10px 12px;
+  font-size: 1.05rem;
+  background: var(--card-bg);
+}
+
+.rb-section { color: var(--accent-text); background: var(--accent); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 1px 6px; flex: none; }
+.rb-text { flex: 1 1 100%; font-family: var(--pixel-font); font-size: 1.3rem; color: var(--ink); }
+.rb-years { color: var(--muted); flex: none; }
+.rb-points { font-family: var(--pixel-font); color: var(--accent); font-size: 1.3rem; margin-left: auto; flex: none; }
+.rb-link {
+  flex: 1 1 100%;
+  font-family: var(--pixel-font);
+  font-size: 1.1rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+.rb-link:hover { text-decoration: underline; }

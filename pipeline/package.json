@@ -12,7 +12,10 @@
     "curate-ui": "node src/curate-ui-server.js",
     "score-headlines": "node src/score-headlines.js",
     "score-decades": "node src/score-decades.js",
-    "schedule-rounds": "node src/schedule-rounds.js"
+    "create-pool": "node src/create-pool.js",
+    "assign-day": "node src/assign-day.js",
+    "review-schedule": "node src/review-schedule.js",
+    "build-rounds": "node src/build-rounds.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5"

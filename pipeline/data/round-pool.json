@@ -1,0 +1,262 @@
+{
+  "pool-0001": {
+    "id": "pool-0001",
+    "createdAt": "2026-09-17T21:24:05.330Z",
+    "headlines": [
+      {
+        "id": "nyt-1906-06-16-800391",
+        "section": "world"
+      },
+      {
+        "id": "nyt-1969-07-02-477ce6",
+        "section": "politics"
+      },
+      {
+        "id": "nyt-2005-06-01-d22023",
+        "section": "business"
+      },
+      {
+        "id": "nyt-2017-06-17-9fcad3",
+        "section": "arts"
+      },
+      {
+        "id": "nyt-1921-06-09-99a14e",
+        "section": "sports"
+      }
+    ]
+  },
+  "pool-0002": {
+    "id": "pool-0002",
+    "createdAt": "2026-09-17T21:26:29.642Z",
+    "headlines": [
+      {
+        "id": "nyt-1970-06-03-d2b53a",
+        "section": "science"
+      },
+      {
+        "id": "nyt-1991-06-13-465826",
+        "section": "sports"
+      },
+      {
+        "id": "nyt-1925-06-15-f5971e",
+        "section": "business"
+      },
+      {
+        "id": "nyt-2015-06-01-88fb77",
+        "section": "politics"
+      },
+      {
+        "id": "nyt-2005-06-01-b36ac9",
+        "section": "world"
+      }
+    ]
+  },
+  "pool-0003": {
+    "id": "pool-0003",
+    "createdAt": "2026-09-22T16:02:43.038Z",
+    "headlines": [
+      {
+        "id": "nyt-2026-06-14-39e9d4",
+        "section": "sports"
+      },
+      {
+        "id": "nyt-2005-06-14-f6ecdf",
+        "section": "arts"
+      },
+      {
+        "id": "nyt-1985-06-05-001856",
+        "section": "world"
+      },
+      {
+        "id": "nyt-1906-06-23-3aad95",
+        "section": "business"
+      },
+      {
+        "id": "nyt-1956-06-13-0acff6",
+        "section": "science"
+      }
+    ]
+  },
+  "pool-0004": {
+    "id": "pool-0004",
+    "createdAt": "2026-09-22T16:06:58.281Z",
+    "headlines": [
+      {
+        "id": "nyt-1995-06-02-5347c3",
+        "section": "politics"
+      },
+      {
+        "id": "nyt-1967-06-21-ae51e1",
+        "section": "sports"
+      },
+      {
+        "id": "nyt-2006-06-17-04a265",
+        "section": "business"
+      },
+      {
+        "id": "nyt-1914-06-14-ef24c9",
+        "section": "arts"
+      },
+      {
+        "id": "nyt-1975-06-13-71f4f3",
+        "section": "world"
+      }
+    ]
+  },
+  "pool-0005": {
+    "id": "pool-0005",
+    "createdAt": "2026-09-22T16:10:29.897Z",
+    "headlines": [
+      {
+        "id": "nyt-2015-06-23-e2eecc",
+        "section": "arts"
+      },
+      {
+        "id": "nyt-2011-06-25-2f176e",
+        "section": "politics"
+      },
+      {
+        "id": "nyt-1975-06-10-1eaefb",
+        "section": "business"
+      },
+      {
+        "id": "nyt-1969-07-05-266070",
+        "section": "sports"
+      },
+      {
+        "id": "nyt-1954-06-30-1be9e1",
+        "section": "science"
+      }
+    ]
+  },
+  "pool-0006": {
+    "id": "pool-0006",
+    "createdAt": "2026-09-22T16:27:03.221Z",
+    "headlines": [
+      {
+        "id": "nyt-2026-06-10-e8f4b9",
+        "section": "science"
+      },
+      {
+        "id": "nyt-1960-06-04-1fd133",
+        "section": "world"
+      },
+      {
+        "id": "nyt-1994-06-23-908a2b",
+        "section": "sports"
+      },
+      {
+        "id": "nyt-1985-06-14-2b9306",
+        "section": "business"
+      },
+      {
+        "id": "nyt-1902-06-09-d5fa38",
+        "section": "politics"
+      }
+    ]
+  },
+  "pool-0007": {
+    "id": "pool-0007",
+    "createdAt": "2026-09-22T16:43:13.195Z",
+    "headlines": [
+      {
+        "id": "nyt-1965-06-29-6e1d75",
+        "section": "world"
+      },
+      {
+        "id": "nyt-2016-06-23-4f0cda",
+        "section": "arts"
+      },
+      {
+        "id": "nyt-1901-06-01-1de6c0",
+        "section": "politics"
+      },
+      {
+        "id": "nyt-2000-06-27-259cee",
+        "section": "science"
+      },
+      {
+        "id": "nyt-1953-06-14-5dd638",
+        "section": "sports"
+      }
+    ]
+  },
+  "pool-0008": {
+    "id": "pool-0008",
+    "createdAt": "2026-09-22T17:09:11.486Z",
+    "headlines": [
+      {
+        "id": "nyt-2023-06-18-3d98fb",
+        "section": "sports"
+      },
+      {
+        "id": "nyt-1965-06-12-5c6c62",
+        "section": "arts"
+      },
+      {
+        "id": "nyt-1947-06-29-6a63c3",
+        "section": "business"
+      },
+      {
+        "id": "nyt-1902-06-20-84b30a",
+        "section": "world"
+      },
+      {
+        "id": "nyt-1955-06-04-f2ed38",
+        "section": "politics"
+      }
+    ]
+  },
+  "pool-0009": {
+    "id": "pool-0009",
+    "createdAt": "2026-09-22T17:18:58.533Z",
+    "headlines": [
+      {
+        "id": "nyt-2021-06-23-64f242",
+        "section": "arts"
+      },
+      {
+        "id": "nyt-1953-06-02-f3a502",
+        "section": "science"
+      },
+      {
+        "id": "nyt-1989-06-20-4a8bdf",
+        "section": "sports"
+      },
+      {
+        "id": "nyt-1973-06-02-56daca",
+        "section": "world"
+      },
+      {
+        "id": "nyt-1921-06-05-fcc876",
+        "section": "business"
+      }
+    ]
+  },
+  "pool-0010": {
+    "id": "pool-0010",
+    "createdAt": "2026-09-22T17:23:21.582Z",
+    "headlines": [
+      {
+        "id": "nyt-2026-06-04-0bc380",
+        "section": "science"
+      },
+      {
+        "id": "nyt-2015-06-06-172735",
+        "section": "sports"
+      },
+      {
+        "id": "nyt-1975-06-02-8ab5dc",
+        "section": "business"
+      },
+      {
+        "id": "nyt-2003-06-09-9fbd82",
+        "section": "arts"
+      },
+      {
+        "id": "nyt-1903-06-12-fc9e8b",
+        "section": "world"
+      }
+    ]
+  }
+}

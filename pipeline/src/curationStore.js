@@ -240,6 +240,23 @@ export async function appendApproved(approved, newRecord) {
   return approved;
 }
 
+// Fixes (typos, wording) to an already-approved headline's text. Text lives
+// only on approved.json, referenced by id everywhere else (round pools,
+// schedule, rounds.json all store `{ id, section }` — never a text copy), so
+// editing it here is what actually fixes it everywhere at once.
+export async function updateApprovedText(id, text) {
+  const trimmed = String(text ?? '').trim();
+  if (!trimmed) throw new Error('Headline text cannot be empty.');
+
+  const approved = await loadJson(APPROVED_PATH, []);
+  const record = approved.find((a) => a.id === id);
+  if (!record) throw new Error(`No approved headline with id ${id}.`);
+
+  record.text = trimmed;
+  await writeFile(APPROVED_PATH, JSON.stringify(approved, null, 2));
+  return record;
+}
+
 // Persists a manual "Reject" decision onto the raw record so it never
 // resurfaces after a refresh/restart — unlike Skip, which is intentionally
 // session-local (queue order only) so a headline can be revisited later.
