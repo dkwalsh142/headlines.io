@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { decodeAnswer } from './answerCodec.js';
 import Newspaper from './Newspaper.jsx';
 import ResultsPaper from './ResultsPaper.jsx';
 import StampText, { STAMP_DURATION, stampDuration, useStampEnabled } from './StampText.jsx';
@@ -31,7 +32,8 @@ export default function RoundPlayer({ round: issue, onComplete, onExit }) {
   function submitGuess() {
     const guessYear = Number(guess);
     if (!Number.isInteger(guessYear) || guessYear < MIN_YEAR || guessYear > maxYear) return;
-    const { year, sourceUrl } = headline;
+    // The answer is only decoded here, once a guess is locked in.
+    const { year, sourceUrl } = decodeAnswer(headline.id, headline.answer);
     const points = scoreGuess(guessYear, year);
     setResults((prev) => [...prev, { headline, guessYear, year, sourceUrl, points }]);
     setPhase('revealing');
