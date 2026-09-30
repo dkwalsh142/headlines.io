@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import FrontPage from './FrontPage.jsx';
 import { loadGameData } from './loadRounds.js';
 import RoundPlayer from './RoundPlayer.jsx';
+import { loadScores, saveScore } from './scoreStore.js';
 import Settings from './Settings.jsx';
 import './App.css';
 
@@ -9,7 +10,8 @@ export default function App() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [activeRound, setActiveRound] = useState(null); // the round object currently being played
-  const [completedTotals, setCompletedTotals] = useState({}); // roundId -> total score, this session only
+  // roundId -> latest total score, persisted across visits (scoreStore.js)
+  const [completedTotals, setCompletedTotals] = useState(loadScores);
   const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
@@ -25,11 +27,13 @@ export default function App() {
     return (
       <RoundPlayer
         round={activeRound}
-        onExit={() => setActiveRound(null)}
-        onComplete={(total) => {
+        onScore={(total) => {
+          // Replays overwrite: the newest score for an issue is the one kept.
+          saveScore(activeRound.id, total);
           setCompletedTotals((prev) => ({ ...prev, [activeRound.id]: total }));
-          setActiveRound(null);
         }}
+        onExit={() => setActiveRound(null)}
+        onComplete={() => setActiveRound(null)}
       />
     );
   }

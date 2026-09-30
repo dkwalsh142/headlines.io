@@ -19,7 +19,10 @@ const MIN_YEAR = 1850;
 const HEADLINE_STAMP_STAGGER = 0.03; // seconds between headline letters
 const BUTTON_STAMP_SCALE = 1.5; // Next button's starting size when it stamps on
 
-export default function RoundPlayer({ round: issue, onComplete, onExit }) {
+// onScore(total) fires as soon as the issue is finished (so the score is kept
+// even if the player exits from the results page); onComplete is the results
+// page's Continue button.
+export default function RoundPlayer({ round: issue, onScore, onComplete, onExit }) {
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState('showing_headline');
   const [guess, setGuess] = useState('');
@@ -42,6 +45,7 @@ export default function RoundPlayer({ round: issue, onComplete, onExit }) {
   function next() {
     if (index + 1 >= issue.headlines.length) {
       setPhase('issue_complete');
+      onScore?.(results.reduce((sum, r) => sum + r.points, 0));
     } else {
       setIndex((i) => i + 1);
       setGuess('');
