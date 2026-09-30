@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "export-data": "node scripts/export-data.js",
+    "check-filler": "node scripts/check-filler-words.js",
     "dev": "npm run export-data && vite",
     "build": "npm run export-data && vite build",
     "lint": "oxlint",

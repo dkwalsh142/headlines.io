@@ -2,7 +2,10 @@
 // decorative fake stories that fill leftover page space around the real
 // headline. Same seed always produces the same output (FNV-1a hash -> a
 // mulberry32 PRNG, no Math.random anywhere), so a headline's filler is
-// stable across re-renders/remounts instead of reshuffling.
+// stable across re-renders/remounts instead of reshuffling. Words that
+// happen to contain an offensive root (blocklist.js) are regenerated.
+
+import { isBlocked } from './blocklist.js';
 
 function hashSeed(str) {
   let h = 0x811c9dc5;
@@ -52,13 +55,27 @@ function makeSyllable(rand, isLast) {
   return syl;
 }
 
-function makeWord(rand) {
+function buildWord(rand) {
   const syllables = pick(rand, SYLLABLE_COUNT_WEIGHTS);
   let word = '';
   for (let i = 0; i < syllables; i++) {
     word += makeSyllable(rand, i === syllables - 1);
   }
   return word;
+}
+
+const MAX_WORD_ATTEMPTS = 50;
+const FALLBACK_WORD = 'lomo';
+
+// Retries with the same seeded stream, so output stays deterministic per
+// seed. The attempt cap only guards against an infinite loop; with the
+// current tables and blocklist a clean word turns up within a few tries.
+function makeWord(rand) {
+  for (let attempt = 0; attempt < MAX_WORD_ATTEMPTS; attempt++) {
+    const word = buildWord(rand);
+    if (!isBlocked(word)) return word;
+  }
+  return FALLBACK_WORD;
 }
 
 function makeSentence(rand) {
