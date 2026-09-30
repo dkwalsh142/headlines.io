@@ -1,35 +1,45 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import Newspaper from './Newspaper.jsx';
+import ResultsPaper from './ResultsPaper.jsx';
+import StampText, { STAMP_DURATION, stampDuration, useStampEnabled } from './StampText.jsx';
 import { scoreGuess } from './scoring.js';
 
 // Game loop (design doc §6.2):
-// idle -> showing_headline -> awaiting_guess -> revealing -> next_headline | round_complete
-const SECTION_LABEL = {
-  politics: 'Politics', world: 'World', business: 'Business', sports: 'Sports',
-  arts: 'Arts', science: 'Science', opinion: 'Opinion', style: 'Style',
-};
+// idle -> showing_headline -> awaiting_guess -> revealing -> next_headline | issue_complete
+//
+// Terminology: "issue" = the daily set of 5 headlines (what used to be
+// called a "round" in code/copy); each individual headline is now its own
+// newspaper page. This only renames user-facing copy and local variables —
+// the underlying `round` prop, onComplete callback, and rounds.json/
+// dateStringToRoundId in the data layer are untouched (follow-up elsewhere).
 
 const MIN_YEAR = 1850;
+const HEADLINE_STAMP_STAGGER = 0.03; // seconds between headline letters
+const BUTTON_STAMP_SCALE = 1.5; // Next button's starting size when it stamps on
 
-export default function RoundPlayer({ round, onComplete, onExit }) {
+export default function RoundPlayer({ round: issue, onComplete, onExit }) {
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState('showing_headline');
   const [guess, setGuess] = useState('');
-  const [results, setResults] = useState([]); // [{headline, guessYear, points}]
+  const [results, setResults] = useState([]); // [{headline, guessYear, year, sourceUrl, points}]
+  const stampEnabled = useStampEnabled();
 
-  const headline = round.headlines[index];
+  const headline = issue.headlines[index];
   const maxYear = new Date().getUTCFullYear();
 
   function submitGuess() {
     const guessYear = Number(guess);
     if (!Number.isInteger(guessYear) || guessYear < MIN_YEAR || guessYear > maxYear) return;
-    const points = scoreGuess(guessYear, headline.year);
-    setResults((prev) => [...prev, { headline, guessYear, points }]);
+    const { year, sourceUrl } = headline;
+    const points = scoreGuess(guessYear, year);
+    setResults((prev) => [...prev, { headline, guessYear, year, sourceUrl, points }]);
     setPhase('revealing');
   }
 
   function next() {
-    if (index + 1 >= round.headlines.length) {
-      setPhase('round_complete');
+    if (index + 1 >= issue.headlines.length) {
+      setPhase('issue_complete');
     } else {
       setIndex((i) => i + 1);
       setGuess('');
@@ -37,81 +47,143 @@ export default function RoundPlayer({ round, onComplete, onExit }) {
     }
   }
 
-  if (phase === 'round_complete') {
-    const total = results.reduce((sum, r) => sum + r.points, 0);
-    return (
-      <div className="round-complete">
-        <h2>Round complete</h2>
-        <div className="total-score">{total.toLocaleString()} points</div>
-        <ul className="result-breakdown">
-          {results.map((r, i) => (
-            <li key={i} className="pixel-frame">
-              <span className="rb-section">{SECTION_LABEL[r.headline.section] ?? r.headline.section}</span>
-              <span className="rb-text">{r.headline.text}</span>
-              <span className="rb-years">guessed {r.guessYear} &middot; actual {r.headline.year}</span>
-              <span className="rb-points">{r.points} pts</span>
-              {r.headline.sourceUrl && (
-                <a className="rb-link" href={r.headline.sourceUrl} target="_blank" rel="noopener noreferrer">
-                  Read the NYT archive article &rarr;
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
-        <button type="button" onClick={() => onComplete(total)}>Continue</button>
+  const isLastHeadline = index + 1 >= issue.headlines.length;
+  const lastResult = results[results.length - 1];
+
+  // Shown as soon as the headline is; focusing the field moves the game into
+  // awaiting_guess. Stays up (field locked, arrow disabled) while revealing, so
+  // the guess reads above the actual year.
+  const isRevealing = phase === 'revealing';
+  const isComplete = phase === 'issue_complete';
+  const guessSlot = (
+    <form
+      className="guess-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        // Enter in the locked field would otherwise implicitly re-submit.
+        if (!isRevealing) submitGuess();
+      }}
+    >
+      <label className="guess-label" htmlFor="guess-year">Guess the year:</label>
+      <input
+        id="guess-year"
+        type="number"
+        inputMode="numeric"
+        placeholder={`(${MIN_YEAR}-${maxYear})`}
+        value={guess}
+        onChange={(e) => setGuess(e.target.value)}
+        onFocus={() => phase === 'showing_headline' && setPhase('awaiting_guess')}
+        min={MIN_YEAR}
+        max={maxYear}
+        readOnly={isRevealing}
+      />
+      {/* Stays visible once a guess is in, just disabled. */}
+      <button
+        type="submit"
+        className="guess-enter"
+        aria-label="Submit guess"
+        title="Submit (Enter)"
+        disabled={isRevealing}
+      >
+        {/* Pixel-art right arrow (→), drawn on a 9×7 grid to match the pixel font */}
+        <svg viewBox="0 0 9 7" width="36" height="28" shapeRendering="crispEdges" aria-hidden="true">
+          <path fill="currentColor" d="M0 3h6v1H0zM6 1h1v5H6zM7 2h1v3H7zM8 3h1v1H8z" />
+        </svg>
+      </button>
+    </form>
+  );
+
+  const actualText = isRevealing ? `Actual: ${lastResult.year}` : '';
+  const pointsText = isRevealing ? `+${lastResult.points} points` : '';
+  const nextText = isLastHeadline ? 'See results' : 'Next headline';
+  // Each results line stamps on after the previous one has settled.
+  const pointsDelay = stampDuration(actualText);
+  const nextDelay = pointsDelay + stampDuration(pointsText);
+  // Rendered from the start as an invisible stand-in with placeholder values
+  // (same lines, same sizes), so the paper is already tall enough for the
+  // results and doesn't grow when they appear. The real results mount fresh
+  // on reveal, which is what kicks off their stamp animation.
+  const revealSlot = isRevealing ? (
+    <div className="reveal">
+      <div className="reveal-row">
+        <span><StampText text={actualText} /></span>
       </div>
-    );
-  }
+      <div className="reveal-points">
+        <StampText text={pointsText} delay={pointsDelay} />
+      </div>
+      {/* The whole button stamps down (oversized -> final size) once the
+          points line has settled. Starts smaller than the letters' scale,
+          since a full-width button at that size would spill across the page. */}
+      <motion.button
+        type="button"
+        className="primary-btn"
+        onClick={next}
+        initial={stampEnabled ? { scale: BUTTON_STAMP_SCALE, opacity: 0 } : false}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: nextDelay, duration: STAMP_DURATION, ease: 'easeOut' }}
+      >
+        {nextText}
+      </motion.button>
+    </div>
+  ) : (
+    <div className="reveal" style={{ visibility: 'hidden' }} aria-hidden="true">
+      <div className="reveal-row">
+        <span>Actual: 0000</span>
+      </div>
+      <div className="reveal-points">+1000 points</div>
+      <button type="button" className="primary-btn" tabIndex={-1}>
+        Next headline
+      </button>
+    </div>
+  );
 
   return (
-    <div className="round-player">
-      <div className="round-player-head">
-        <span>Headline {index + 1} of {round.headlines.length}</span>
-        <button type="button" className="exit-btn" onClick={onExit} title="Exit round">&times;</button>
-      </div>
-
-      <div className="headline-card pixel-frame">
-        <span className="headline-section">{SECTION_LABEL[headline.section] ?? headline.section}</span>
-        <p className="headline-text">{headline.text}</p>
-      </div>
-
-      {phase === 'showing_headline' && (
-        <button type="button" className="primary-btn" onClick={() => setPhase('awaiting_guess')}>
-          Guess the year
-        </button>
-      )}
-
-      {phase === 'awaiting_guess' && (
-        <form
-          className="guess-form"
-          onSubmit={(e) => { e.preventDefault(); submitGuess(); }}
-        >
-          <input
-            type="number"
-            inputMode="numeric"
-            placeholder={`Year (${MIN_YEAR}-${maxYear})`}
-            value={guess}
-            onChange={(e) => setGuess(e.target.value)}
-            min={MIN_YEAR}
-            max={maxYear}
-            autoFocus
-          />
-          <button type="submit" className="primary-btn">Submit</button>
-        </form>
-      )}
-
-      {phase === 'revealing' && (
-        <div className="reveal pixel-frame">
-          <div className="reveal-row">
-            <span>Your guess: {results[results.length - 1].guessYear}</span>
-            <span>Actual: {headline.year}</span>
-          </div>
-          <div className="reveal-points">+{results[results.length - 1].points} points</div>
-          <button type="button" className="primary-btn" onClick={next}>
-            {index + 1 >= round.headlines.length ? 'See results' : 'Next headline'}
-          </button>
+    <div className="newspaper-stage">
+      <div className="newspaper-stage-inner">
+        <div className="round-player-head">
+          <span>{isComplete ? 'Issue complete' : `Headline ${index + 1} of ${issue.headlines.length}`}</span>
+          <button type="button" className="exit-btn" onClick={onExit} title="Exit issue">&times;</button>
         </div>
-      )}
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={isComplete ? 'results' : headline.id}
+            initial={{ x: '100%', opacity: 0, rotate: 15 }}
+            animate={{ x: 0, opacity: 1, rotate: 0, transition: { duration: 0.4, ease: 'easeOut' } }}
+            exit={{ x: '-100%', opacity: 0, rotate: -15, transition: { duration: 0.4, ease: 'easeIn' } }}
+          >
+            {isComplete ? (
+              // The last headline's paper spins out and this one spins in,
+              // same as between headlines.
+              <ResultsPaper
+                seed={`results-${issue.id}`}
+                title="The Daily Headlines"
+                date={issue.date}
+                results={results}
+                onContinue={onComplete}
+              />
+            ) : (
+              <Newspaper
+                seed={headline.id}
+                section={headline.section}
+                issueNumber={index + 1}
+                date={issue.date}
+                title="The Daily Headlines"
+                lead={
+                  <p className="headline-text">
+                    {/* Starts once the paper's 0.4s slide-in has landed; a
+                        faster stagger than the default since headlines are long. */}
+                    <StampText text={headline.text} delay={0.4} stagger={HEADLINE_STAMP_STAGGER} />
+                  </p>
+                }
+                guess={guessSlot}
+              >
+                {revealSlot}
+              </Newspaper>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

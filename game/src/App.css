@@ -1,6 +1,72 @@
 .app-shell { display: flex; flex-direction: column; gap: 32px; }
 
-.today-section, .beta-section {
+/* Page title with a small text action (Settings / Back) on the right. */
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
+
+/* Plain-text button, no chrome. background: none beats the global
+   button:hover fill, which outranks all:unset. */
+.text-btn {
+  all: unset;
+  cursor: pointer;
+  font-family: var(--pixel-font);
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.text-btn:hover,
+.text-btn:focus-visible { color: var(--ink); background: none; }
+
+/* --- Settings --- */
+
+.settings-section {
+  background: var(--card-bg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Section title (Visual / Audio); the section's gap handles spacing. */
+.settings-section h2 { margin: 0; }
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.setting-label {
+  font-family: var(--pixel-font);
+  font-size: 1.4rem;
+  color: var(--ink);
+}
+
+.setting-description {
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.setting-toggle {
+  flex: none;
+  min-width: 72px;
+  padding: 6px 12px;
+}
+
+.setting-toggle.is-on,
+.setting-toggle.is-on:hover {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.beta-section {
   background: var(--card-bg);
   padding: 20px;
 }
@@ -52,9 +118,12 @@
   font-size: 1.6rem;
   line-height: 1;
   color: var(--muted);
-  padding: 4px 8px;
+  padding: 4px 0 4px 8px; /* no right padding: the × sits flush with the paper's right edge */
 }
-.exit-btn:hover { color: var(--text); }
+/* background: none overrides the global button:hover fill, which outranks
+   all:unset — only the color should change. */
+.exit-btn:hover,
+.exit-btn:focus-visible { color: var(--text); background: none; }
 
 .headline-card {
   background: var(--card-bg);
@@ -85,36 +154,61 @@
   color: var(--ink);
 }
 
-.guess-form { display: flex; gap: 12px; }
+.guess-form { display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+.guess-label {
+  font-family: var(--pixel-font);
+  font-size: 1.6rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
 
 .guess-form input {
-  flex: 1;
+  /* Fixed width (fits the "(1850-2026)" hint) rather than filling the row,
+     so label + field + arrow can sit centered as a group. */
+  flex: 0 1 120px;
   font: inherit;
   font-family: var(--pixel-font);
   font-size: 1.6rem;
   text-align: center;
-  border: var(--pixel) solid var(--ink);
-  box-shadow:
-    calc(var(--pixel) * -1) 0 0 0 var(--ink),
-    var(--pixel) 0 0 0 var(--ink),
-    0 calc(var(--pixel) * -1) 0 0 var(--ink),
-    0 var(--pixel) 0 0 var(--ink);
-  margin: var(--pixel);
-  background: var(--card-bg);
+  /* No box — just an underline, like a fill-in-the-blank. */
+  border: none;
+  border-bottom: 2px solid var(--ink);
+  background: transparent;
   color: var(--text);
-  padding: 10px;
+  padding: 4px 6px;
   outline: none;
+  min-width: 0;
+  -moz-appearance: textfield;
 }
 
-.guess-form input:focus {
-  box-shadow:
-    calc(var(--pixel) * -1) 0 0 0 var(--accent),
-    var(--pixel) 0 0 0 var(--accent),
-    0 calc(var(--pixel) * -1) 0 0 var(--accent),
-    0 var(--pixel) 0 0 var(--accent);
-}
+/* No number spinner arrows — they eat into the narrow field. */
+.guess-form input::-webkit-outer-spin-button,
+.guess-form input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-.guess-form .primary-btn { width: auto; flex: none; padding: 10px 24px; }
+/* Range hint in the lighter muted ink; hidden as soon as the field is
+   clicked into, rather than only once the user starts typing. */
+.guess-form input::placeholder { color: var(--muted); opacity: 0.6; font-size: 1.15rem; }
+.guess-form input:focus::placeholder { color: transparent; }
+
+/* Submit: just a pixel → arrow in ink, no button chrome. */
+.guess-enter {
+  all: unset;
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--ink);
+}
+/* Only the arrow changes color on hover; background: none overrides the
+   global button:hover fill, which outranks .guess-enter's all:unset. */
+.guess-enter:hover,
+.guess-enter:focus-visible { color: var(--accent); background: none; }
+
+/* Once the guess is submitted: still shown, but inert (no hover red). */
+.guess-enter:disabled,
+.guess-enter:disabled:hover { cursor: default; color: var(--ink); }
 
 .reveal {
   background: var(--card-bg);
@@ -128,39 +222,3 @@
 .reveal-row { display: flex; justify-content: space-between; font-family: var(--pixel-font); font-size: 1.4rem; color: var(--muted); }
 
 .reveal-points { font-family: var(--pixel-font); font-size: 2.2rem; color: var(--accent); }
-
-/* --- Round complete --- */
-
-.round-complete { display: flex; flex-direction: column; gap: 18px; text-align: center; }
-
-.total-score {
-  font-family: var(--pixel-font);
-  font-size: 3.2rem;
-  color: var(--accent);
-  text-shadow: var(--pixel) var(--pixel) 0 var(--ink);
-}
-
-.result-breakdown { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; text-align: left; }
-
-.result-breakdown li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
-  padding: 10px 12px;
-  font-size: 1.05rem;
-  background: var(--card-bg);
-}
-
-.rb-section { color: var(--accent-text); background: var(--accent); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 1px 6px; flex: none; }
-.rb-text { flex: 1 1 100%; font-family: var(--pixel-font); font-size: 1.3rem; color: var(--ink); }
-.rb-years { color: var(--muted); flex: none; }
-.rb-points { font-family: var(--pixel-font); color: var(--accent); font-size: 1.3rem; margin-left: auto; flex: none; }
-.rb-link {
-  flex: 1 1 100%;
-  font-family: var(--pixel-font);
-  font-size: 1.1rem;
-  color: var(--accent);
-  text-decoration: none;
-}
-.rb-link:hover { text-decoration: underline; }

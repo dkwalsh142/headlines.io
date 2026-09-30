@@ -1,0 +1,451 @@
+.newspaper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Every newspaper page (front page, headlines, results) rocks gently back
+   and forth, for visual interest. Toggled by the "Page rocking" setting,
+   which sets data-page-rock on <html> (SettingsContext.jsx); always off for
+   players who've asked their system for reduced motion. Composes with the
+   round pages' slide-in, which transforms a wrapper, not the paper itself. */
+/* Starts level and swinging left: the cycle runs right -> left -> right, and
+   the negative delay (a quarter of the 3s cycle) begins each page halfway
+   through the right-to-left swing, i.e. at 0deg heading left. */
+:root[data-page-rock='on'] .newspaper {
+  animation: np-rock 3s ease-in-out -0.75s infinite;
+}
+
+@keyframes np-rock {
+  0%, 100% { transform: rotate(0.6deg); }
+  50% { transform: rotate(-0.6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-page-rock='on'] .newspaper { animation: none; }
+}
+
+/* TornFrame's two-layer torn-edge border (see TornFrame.jsx for why this
+   needs two clip-pathed layers rather than a single border/box-shadow). */
+.torn-frame {
+  position: relative;
+}
+
+/* Expanded by --pixel on every side (not inset:0) because the outer
+   polygon's jogs can land outside the frame's own [0,width]x[0,height] box
+   when the border staggers outward — clip-path's reference box is this
+   element's own border-box, so without this margin those outward jogs get
+   clipped flat at the edge, making the border look thinner there than the
+   inward jogs. TornFrame.jsx offsets every polygon point by --pixel to
+   match this expanded box exactly. */
+.torn-frame-ink {
+  position: absolute;
+  inset: calc(var(--pixel) * -1);
+  background: var(--ink);
+}
+
+.torn-frame-paper {
+  position: relative;
+  background: var(--card-bg);
+}
+
+/* Coffee stains (CoffeeStains.jsx): a click-through layer over the whole
+   paper. Each stain is centered on its random spot; multiply keeps the
+   print beneath readable, like a real stain soaking into newsprint. */
+.coffee-stains {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.coffee-stain {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: multiply;
+}
+
+.np-masthead {
+  padding: 20px 24px 10px;
+  text-align: center;
+}
+
+.np-title {
+  font-family: var(--headline-font);
+  font-size: 2.6rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  margin: 0 0 10px;
+  color: var(--ink);
+  text-shadow: 2px 2px 0 var(--accent); /* red backing like the front-page h1, offset less (h1 uses var(--pixel) = 3px) */
+}
+
+.np-dateline {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 2px solid var(--ink);
+}
+
+.np-issue {
+  justify-self: start;
+  font-family: var(--pixel-font);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* This is the play/schedule date (e.g. "Sep. 28, 2026") — never the
+   headline's own historical year, which would give away the answer. */
+.np-section {
+  justify-self: center;
+  font-family: var(--pixel-font);
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.np-date {
+  justify-self: end;
+  font-family: var(--pixel-font);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.np-double-rule {
+  height: 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  margin: 0 24px 0;
+}
+
+.np-body {
+  display: grid;
+  /* grid-template-columns is set inline by Newspaper.jsx, since the wider
+     headline column's position is randomized per load. */
+  min-height: 460px;
+}
+
+.np-column {
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  min-width: 0; /* grid items default to min-width:auto, which lets long
+                   unbroken content (the headline) overflow its track
+                   instead of wrapping within it */
+}
+
+.np-column + .np-column { border-left: 2px solid var(--ink); }
+
+.np-column-lead {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.np-lead {
+  text-align: center;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ink);
+}
+
+/* Drop the headline paragraph's default bottom margin so the rule's
+   spacing is controlled solely by .np-lead's padding-bottom. */
+.np-lead > :last-child { margin-bottom: 0; }
+
+/* Guess row, then (once guessed) the reveal stacked beneath it. */
+.np-lead-below {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* The reveal (actual year + points + next button) renders in the space
+   below the headline rather than its own full-width card, so it needs more
+   compact sizing than its original standalone context used. */
+.np-lead-below .reveal {
+  padding: 0;
+  gap: 8px;
+  text-align: center;
+}
+
+.np-lead-below .reveal-row {
+  flex-direction: column;
+  gap: 2px;
+  font-size: 1.6rem; /* matches the "Guess the year:" label above it */
+  color: var(--ink);
+}
+
+.np-lead-below .reveal-points {
+  font-size: 1.5rem;
+}
+
+.np-lead-below .primary-btn {
+  width: auto;
+  padding: 8px 16px;
+  font-size: 1rem;
+}
+
+/* Filler is absolutely positioned so it never influences grid track sizing
+   — only lead/guess/children (in-flow content) can grow the layout. */
+.np-filler-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.np-filler-inner {
+  position: absolute;
+  inset: 0;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.np-filler-story + .np-filler-story {
+  border-top: 2px solid var(--ink);
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.np-filler-headline {
+  font-family: var(--headline-font);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid currentColor; /* same lighter ink as the headline text */
+  color: color-mix(in srgb, var(--ink) 60%, var(--card-bg));
+  line-height: 1.2;
+}
+
+/* Cap at two lines: anything wrapping to a third line is clipped. No
+   ellipsis needed since the words are gibberish anyway. Clamped on an inner
+   span rather than the h3 so the clip edge is the text itself, not the h3's
+   padding box (which would let a third line peek into padding-bottom). */
+.np-filler-headline-text {
+  display: block;
+  max-height: calc(2 * 1.2em);
+  overflow: hidden;
+}
+
+.np-filler-paragraph {
+  font-family: var(--filler-font);
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: justify;
+  color: color-mix(in srgb, var(--ink) 45%, var(--card-bg));
+  margin: 0 0 8px;
+  display: flow-root; /* contain the floated jump line in the height */
+}
+
+/* "Cont'd on A5" jump line ending each story's text. Floated right so it
+   sits flush with the right edge of the text's last line, dropping to its
+   own line only when there isn't room. FillerLayer trims the last story so
+   its jump line always lands inside the column. */
+.np-filler-contd {
+  float: right;
+  margin-left: 0.5em;
+  font-family: var(--pixel-font);
+  font-size: 0.85rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* No trailing margin after the jump line, so it can sit right at the
+   column's bottom padding. */
+.np-filler-story:last-child .np-filler-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Untrimmed copy FillerLayer measures against; laid out but never seen. */
+.np-filler-measure {
+  visibility: hidden;
+}
+
+/* --- Results paper (ResultsPaper.jsx) --- */
+
+/* Lead story: the total score as the page's banner headline. */
+.rp-lead {
+  padding: 20px 24px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.rp-score {
+  font-family: var(--headline-font);
+  font-size: 3rem;
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--ink);
+}
+
+.rp-deck {
+  font-family: var(--pixel-font);
+  font-size: 1.3rem;
+  color: var(--muted);
+}
+
+.rp-continue {
+  width: auto;
+  margin-top: 10px;
+  padding: 8px 24px;
+  font-size: 1rem;
+}
+
+/* One short article per headline, in columns under a full-width rule.
+   Column dividers use the overflow trick: every article has a left border
+   pulled 2px outside its box, and the container clips the ones that land
+   past its left edge, so only the dividers *between* columns show on any
+   row, however the grid wraps. */
+.rp-articles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-top: 2px solid var(--ink);
+  margin: 0 24px 24px;
+  overflow: hidden;
+}
+
+.rp-article {
+  border-left: 2px solid var(--ink);
+  margin-left: -2px;
+  padding: 14px 12px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rp-kicker {
+  font-family: var(--pixel-font);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+
+.rp-headline {
+  font-family: var(--headline-font);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.25;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+  color: var(--ink);
+  overflow-wrap: break-word;
+}
+
+.rp-years {
+  font-family: var(--pixel-font);
+  font-size: 1.1rem;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+.rp-points {
+  font-family: var(--pixel-font);
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+
+.rp-link {
+  font-family: var(--pixel-font);
+  font-size: 1rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.rp-link:hover { color: var(--accent); text-decoration: underline; }
+
+@media (max-width: 700px) {
+  .rp-articles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* --- Front page (FrontPage.jsx) --- */
+
+/* Below the lead headline: a short deck and the play button, centered
+   under the headline (the round pages' guess UI is left-aligned). */
+.fp-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.fp-deck {
+  font-family: var(--pixel-font);
+  font-size: 1.3rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.fp-play {
+  width: auto;
+  padding: 10px 28px;
+}
+
+/* Lead column stretches its below-headline area to the column's full
+   height, so the sections below can fill what's left. */
+.front-page .np-lead-below { flex: 1; }
+
+/* Two side-by-side mini stories under the play button. */
+.fp-sections {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 2px solid var(--ink);
+  margin-top: 8px;
+}
+
+.fp-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 12px 12px 0 0;
+}
+
+.fp-section + .fp-section {
+  border-left: 2px solid var(--ink);
+  padding: 12px 0 0 12px;
+}
+
+/* Real (clickable) headline, styled like an article headline with a rule
+   under it; red on hover like the submit arrow. */
+.fp-section-head {
+  all: unset;
+  display: block;
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--headline-font);
+  font-size: 1.4rem;
+  line-height: 1.2;
+  color: var(--ink);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+}
+.fp-section-head:hover,
+.fp-section-head:focus-visible { color: var(--accent); background: none; }
+
+/* Not a link yet (see SUPPORT_URL in FrontPage.jsx). */
+.fp-section-head.is-placeholder { cursor: default; }
+.fp-section-head.is-placeholder:hover { color: var(--ink); }
+
+/* Fake body text under each section headline, trimmed to fit (FillerLayer).
+   Absolutely-positioned inside, so it only uses space, never adds any. */
+.fp-section-filler {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.fp-section-filler .np-filler-inner { padding: 8px 0 0; }

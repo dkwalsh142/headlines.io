@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import FrontPage from './FrontPage.jsx';
 import { loadGameData } from './loadRounds.js';
 import RoundPlayer from './RoundPlayer.jsx';
+import Settings from './Settings.jsx';
 import './App.css';
 
 export default function App() {
@@ -8,6 +10,7 @@ export default function App() {
   const [error, setError] = useState(null);
   const [activeRound, setActiveRound] = useState(null); // the round object currently being played
   const [completedTotals, setCompletedTotals] = useState({}); // roundId -> total score, this session only
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     loadGameData().then(setData).catch((err) => setError(err.message));
@@ -15,6 +18,8 @@ export default function App() {
 
   if (error) return <div className="state-message">Failed to load: {error}</div>;
   if (!data) return <div className="state-message">Loading…</div>;
+
+  if (showSettings) return <Settings onBack={() => setShowSettings(false)} />;
 
   if (activeRound) {
     return (
@@ -31,24 +36,18 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <h1>Headlines</h1>
-
-      <section className="today-section pixel-frame">
-        <h2>Today's round</h2>
-        {data.todayRound ? (
-          <button type="button" className="primary-btn" onClick={() => setActiveRound(data.todayRound)}>
-            Play {data.todayRound.date}
-          </button>
-        ) : (
-          <p className="state-message">No round scheduled for today.</p>
-        )}
-      </section>
+      <FrontPage
+        todayRound={data.todayRound}
+        todayTotal={data.todayRound ? completedTotals[data.todayRound.id] : undefined}
+        onPlay={() => setActiveRound(data.todayRound)}
+        onSettings={() => setShowSettings(true)}
+      />
 
       <section className="beta-section pixel-frame">
-        <h2>Beta access &mdash; all rounds</h2>
+        <h2>Beta access &mdash; all issues</h2>
         <p className="beta-note">
-          Every scheduled round, playable in any order. This list won't exist in the shipped game
-          (which only ever unlocks today's round) &mdash; it's here so pools can be played through
+          Every scheduled issue, playable in any order. This list won't exist in the shipped game
+          (which only ever unlocks today's issue) &mdash; it's here so pools can be played through
           during development.
         </p>
         <ul className="round-list">

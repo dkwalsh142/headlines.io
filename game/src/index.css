@@ -24,6 +24,10 @@
      small UI chrome (buttons, scores, labels) where a display face would
      hurt legibility. */
   --headline-font: 'Alagard', var(--pixel-font);
+  /* Filler/decorative body text in Newspaper.jsx's gibberish columns —
+     defaults to the pixel font, swappable later for a glyph/alien font
+     without touching Newspaper.css. */
+  --filler-font: var(--pixel-font);
 
   color-scheme: light;
   font: 20px/1.4 var(--pixel-font);
@@ -38,6 +42,22 @@
 
 * { box-sizing: border-box; }
 
+/* Clips the horizontal travel of a paper sliding fully off-screen (see
+   RoundPlayer.jsx's AnimatePresence transition) so it doesn't extend the
+   page's scrollable area. Set on <html> (the element that actually owns
+   page-level horizontal scroll — body's own overflow-x alone doesn't stop
+   the root scrolling container from growing to fit body's rendered size).
+   Deliberately NOT on .newspaper-stage: setting overflow-x on an element
+   forces its paired overflow-y (even set to "visible") to compute as "auto"
+   instead — a CSS spec quirk, not a bug — which clips the entrance's
+   rotation (its bounding box is briefly taller than the paper itself)
+   against that element's own content-capped height. html/body's height is
+   never artificially capped that way, so clipping x here doesn't create
+   the same problem. */
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   background:
@@ -50,6 +70,30 @@ body {
   margin: 0 auto;
   min-height: 100svh;
   padding: 24px 16px 64px;
+}
+
+/* Breaks out of #root's 560px cap while a Newspaper page is on screen —
+   that layout is desktop-first and needs more room than the rest of the app
+   (home screen, issue-complete list), which stays phone-friendly. A child's
+   own max-width can't exceed its parent's content box, so this uses the
+   "break out of a centered container" pattern: full viewport width via
+   negative margins sized to #root's own horizontal offset, then re-centers
+   an inner max-width around that. */
+.newspaper-stage {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: 0 16px;
+  /* No overflow clipping here (see body{} above for where the horizontal
+     slide is actually contained) — this element's height is capped to its
+     content, so clipping any axis here would cut off the entrance's
+     rotation, whose bounding box is briefly taller than the paper itself. */
+}
+
+.newspaper-stage-inner {
+  max-width: 900px; /* matches .newspaper, so the header row above it lines
+                       up with the paper's left and right edges */
+  margin: 0 auto;
 }
 
 h1 {
