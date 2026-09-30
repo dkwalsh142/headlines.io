@@ -77,21 +77,25 @@ export default function FrontPage({ todayRound, todayTotal, onPlay, onSettings }
               <div className="fp-body">{body}</div>
               <div className="fp-sections">
                 <section className="fp-section">
-                  <button type="button" className="fp-section-head" onClick={onSettings}>
-                    Settings
-                  </button>
+                  <div className="fp-section-title">
+                    <button type="button" className="fp-section-head" onClick={onSettings}>
+                      Settings
+                    </button>
+                  </div>
                   <div className="fp-section-filler">
                     <FillerLayer stories={sectionFiller[0]} />
                   </div>
                 </section>
                 <section className="fp-section">
-                  {SUPPORT_URL ? (
-                    <a className="fp-section-head" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
-                      Support the Developer
-                    </a>
-                  ) : (
-                    <h3 className="fp-section-head is-placeholder">Support the Developer</h3>
-                  )}
+                  <div className="fp-section-title">
+                    {SUPPORT_URL ? (
+                      <a className="fp-section-head" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+                        Support the Developer
+                      </a>
+                    ) : (
+                      <h3 className="fp-section-head is-placeholder">Support the Developer</h3>
+                    )}
+                  </div>
                   <div className="fp-section-filler">
                     <FillerLayer stories={sectionFiller[1]} />
                   </div>

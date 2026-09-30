@@ -421,17 +421,25 @@
 
 /* Real (clickable) headline, styled like an article headline with a rule
    under it; red on hover like the submit arrow. */
+/* The rule under each headline lives on this wrapper, not the headline
+   itself, so it stays put when the button nudges on press (global
+   button:active) — only the text moves. */
+.fp-section-title {
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+  text-align: center;
+}
+
 .fp-section-head {
   all: unset;
   display: block;
+  width: 100%; /* a <button> shrinks to its text even as a block; stretch it so the text centers */
   cursor: pointer;
   text-align: center;
   font-family: var(--headline-font);
   font-size: 1.4rem;
   line-height: 1.2;
   color: var(--ink);
-  padding-bottom: 8px;
-  border-bottom: 2px solid var(--ink);
 }
 .fp-section-head:hover,
 .fp-section-head:focus-visible { color: var(--accent); background: none; }
