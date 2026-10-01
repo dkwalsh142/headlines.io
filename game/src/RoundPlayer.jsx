@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { decodeAnswer } from './answerCodec.js';
 import Newspaper from './Newspaper.jsx';
+import { clearProgress, loadProgress, saveProgress } from './progressStore.js';
 import ResultsPaper from './ResultsPaper.jsx';
 import StampText, { STAMP_DURATION, stampDuration, useStampEnabled } from './StampText.jsx';
 import { scoreGuess } from './scoring.js';
@@ -19,18 +20,50 @@ const MIN_YEAR = 1850;
 const HEADLINE_STAMP_STAGGER = 0.03; // seconds between headline letters
 const BUTTON_STAMP_SCALE = 1.5; // Next button's starting size when it stamps on
 
+// Rebuilds this issue's saved progress (progressStore.js) into initial state,
+// or starts fresh. Saved results reference headlines by id; if any no longer
+// matches the issue (data changed under it), the save is discarded.
+function restoreProgress(issue) {
+  const saved = loadProgress(issue.id);
+  if (!saved || !Array.isArray(saved.results)) return null;
+  const results = saved.results.map((r) => ({ ...r, headline: issue.headlines.find((h) => h.id === r.headlineId) }));
+  const index = saved.index;
+  if (results.some((r) => !r.headline) || !(index >= 0 && index < issue.headlines.length)) return null;
+  const guessedCurrent = results.length > index;
+  return {
+    index,
+    results,
+    phase: guessedCurrent ? 'revealing' : 'showing_headline',
+    guess: guessedCurrent ? String(results[index].guessYear) : '',
+  };
+}
+
 // onScore(total) fires as soon as the issue is finished (so the score is kept
 // even if the player exits from the results page); onComplete is the results
 // page's Continue button.
 export default function RoundPlayer({ round: issue, onScore, onComplete, onExit }) {
-  const [index, setIndex] = useState(0);
-  const [phase, setPhase] = useState('showing_headline');
-  const [guess, setGuess] = useState('');
-  const [results, setResults] = useState([]); // [{headline, guessYear, year, sourceUrl, points}]
+  const [restored] = useState(() => restoreProgress(issue));
+  const [index, setIndex] = useState(restored?.index ?? 0);
+  const [phase, setPhase] = useState(restored?.phase ?? 'showing_headline');
+  const [guess, setGuess] = useState(restored?.guess ?? '');
+  const [results, setResults] = useState(restored?.results ?? []); // [{headline, guessYear, year, sourceUrl, points}]
   const stampEnabled = useStampEnabled();
 
   const headline = issue.headlines[index];
   const maxYear = new Date().getUTCFullYear();
+
+  // Save progress after every guess / advance, so exiting (X, reload, closing
+  // the tab) resumes here; a finished issue's progress is dropped.
+  useEffect(() => {
+    if (phase === 'issue_complete') {
+      clearProgress(issue.id);
+    } else if (results.length > 0) {
+      saveProgress(issue.id, {
+        index,
+        results: results.map(({ headline: h, ...rest }) => ({ ...rest, headlineId: h.id })),
+      });
+    }
+  }, [issue.id, index, results, phase]);
 
   function submitGuess() {
     const guessYear = Number(guess);

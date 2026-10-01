@@ -17,7 +17,7 @@ const HEADLINE_STAMP_STAGGER = 0.03; // matches the round pages' headlines
 // renders as plain, unclickable text.
 const SUPPORT_URL = null;
 
-export default function FrontPage({ todayRound, todayTotal, onPlay, onSettings }) {
+export default function FrontPage({ todayRound, todayTotal, todayInProgress, onPlay, onSettings }) {
   const date = todayRound?.date ?? todayDateString();
   const played = todayTotal != null;
   const seed = `front-page-${date}`;
@@ -51,7 +51,7 @@ export default function FrontPage({ todayRound, todayTotal, onPlay, onSettings }
           : `${todayRound.headlines.length} real headlines from the New York Times archives. Guess the year each one was printed.`}
       </p>
       <button type="button" className="primary-btn fp-play" onClick={onPlay}>
-        {played ? 'Play again' : "Play today's issue"}
+        {todayInProgress ? "Resume today's issue" : played ? 'Play again' : "Play today's issue"}
       </button>
     </>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import FrontPage from './FrontPage.jsx';
 import { loadGameData } from './loadRounds.js';
+import { clearAllProgress, loadProgressIds } from './progressStore.js';
 import RoundPlayer from './RoundPlayer.jsx';
 import { clearScores, loadScores, saveScore } from './scoreStore.js';
 import Settings from './Settings.jsx';
@@ -12,6 +13,8 @@ export default function App() {
   const [activeRound, setActiveRound] = useState(null); // the round object currently being played
   // roundId -> latest total score, persisted across visits (scoreStore.js)
   const [completedTotals, setCompletedTotals] = useState(loadScores);
+  // Issues exited part-way through (progressStore.js), shown as "Resume".
+  const [inProgressIds, setInProgressIds] = useState(loadProgressIds);
   const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
@@ -32,8 +35,14 @@ export default function App() {
           saveScore(activeRound.id, total);
           setCompletedTotals((prev) => ({ ...prev, [activeRound.id]: total }));
         }}
-        onExit={() => setActiveRound(null)}
-        onComplete={() => setActiveRound(null)}
+        onExit={() => {
+          setInProgressIds(loadProgressIds());
+          setActiveRound(null);
+        }}
+        onComplete={() => {
+          setInProgressIds(loadProgressIds());
+          setActiveRound(null);
+        }}
       />
     );
   }
@@ -43,6 +52,7 @@ export default function App() {
       <FrontPage
         todayRound={data.todayRound}
         todayTotal={data.todayRound ? completedTotals[data.todayRound.id] : undefined}
+        todayInProgress={data.todayRound ? inProgressIds.has(data.todayRound.id) : false}
         onPlay={() => setActiveRound(data.todayRound)}
         onSettings={() => setShowSettings(true)}
       />
@@ -54,11 +64,13 @@ export default function App() {
           <button
             type="button"
             className="beta-reset"
-            disabled={Object.keys(completedTotals).length === 0}
+            disabled={Object.keys(completedTotals).length === 0 && inProgressIds.size === 0}
             onClick={() => {
-              if (!window.confirm('Reset all saved scores?')) return;
+              if (!window.confirm('Reset all saved scores and in-progress issues?')) return;
               clearScores();
+              clearAllProgress();
               setCompletedTotals({});
+              setInProgressIds(new Set());
             }}
           >
             Reset all scores
@@ -80,7 +92,7 @@ export default function App() {
                 <span className="rl-score">{completedTotals[round.id]} pts</span>
               )}
               <button type="button" onClick={() => setActiveRound(round)}>
-                {round.id in completedTotals ? 'Replay' : 'Play'}
+                {inProgressIds.has(round.id) ? 'Resume' : round.id in completedTotals ? 'Replay' : 'Play'}
               </button>
             </li>
           ))}
