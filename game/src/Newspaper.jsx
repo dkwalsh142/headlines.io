@@ -110,13 +110,37 @@ export default function Newspaper({
   );
 }
 
+// Pixel-art ornament flanking the paper's title (a newspaper "ear"): a dot
+// and dash leading into a rule with serif ticks, ending in a diamond pointed
+// at the title. Drawn on the same 3px grid as the torn border (--pixel), in
+// ink with the title's red backing; the right-hand one is mirrored.
+const FLOURISH_PATH =
+  'M15 0h1v1h-1zM14 1h3v1h-3zM10 2h1v1h-1zM13 2h5v1h-5zM0 3h1v1h-1zM2 3h2v1h-2zM5 3h7v1h-7zM13 3h7v1h-7zM10 4h1v1h-1zM13 4h5v1h-5zM14 5h3v1h-3zM15 6h1v1h-1z';
+
+function MastheadFlourish({ mirrored = false }) {
+  return (
+    <svg
+      className={['np-flourish', mirrored && 'is-mirrored'].filter(Boolean).join(' ')}
+      viewBox="0 0 20 7"
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+    >
+      <path fill="currentColor" d={FLOURISH_PATH} />
+    </svg>
+  );
+}
+
 // Paper title over a left / center / right dateline row, then the double
 // rule. Shared with ResultsPaper so every page of the issue matches.
 export function Masthead({ title, left, center, right }) {
   return (
     <>
       <header className="np-masthead">
-        <h2 className="np-title">{title}</h2>
+        <h2 className="np-title">
+          <MastheadFlourish />
+          <span className="np-title-text">{title}</span>
+          <MastheadFlourish mirrored />
+        </h2>
         <div className="np-dateline">
           <span className="np-issue">{left}</span>
           <span className="np-section">{center}</span>
