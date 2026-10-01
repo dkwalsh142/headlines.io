@@ -83,21 +83,14 @@
   text-shadow: 2px 2px 0 var(--accent); /* red backing like the front-page h1, offset less (h1 uses var(--pixel) = 3px) */
 }
 
-/* Masthead flourishes (MastheadFlourish in Newspaper.jsx): 20x7 pixels at
-   4px each (a step up from --pixel, to hold their own beside the 2.6rem
-   title), with the same 2px red backing as the title text (a
-   drop-shadow, since text-shadow doesn't reach SVG). Dropped on narrow
-   screens, where the title itself wraps. */
+/* Masthead flourishes (MastheadFlourish in Newspaper.jsx, which sizes them
+   from its pixel grid, one --pixel per grid pixel), in the fake stories'
+   light body-text ink. Dropped on narrow screens, where the title wraps. */
 .np-flourish {
   flex: none;
-  width: 80px;
-  height: 28px;
-  color: var(--ink);
-  filter: drop-shadow(2px 2px 0 var(--accent));
+  color: color-mix(in srgb, var(--ink) 45%, var(--card-bg)); /* same as the fake stories' body text */
 }
 .np-flourish.is-mirrored { transform: scaleX(-1); }
-/* Mirroring flips the shadow too; keep it falling down-right like the text's. */
-.np-flourish.is-mirrored { filter: drop-shadow(-2px 2px 0 var(--accent)); }
 
 @media (max-width: 700px) {
   .np-flourish { display: none; }
