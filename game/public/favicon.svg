@@ -1,8 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
-  <!-- "H" from Alagard (the masthead font), traced from its pixel outline
-       (public/fonts/alagard.ttf, 1 px = 64 font units), with the masthead's
-       red backing offset one pixel down-right, on the paper color. -->
-  <rect width="16" height="16" fill="#f4efe0"/>
-  <path transform="translate(4 3)" fill="#b2231b" d="M8 11H6V6H3V11H1V3H0V2H1V1H2V0H3V5H6V1H7V0H8V9H9V10H8Z"/>
-  <path transform="translate(3 2)" fill="#1c1a14" d="M8 11H6V6H3V11H1V3H0V2H1V1H2V0H3V5H6V1H7V0H8V9H9V10H8Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Pixel "H" from Alagard (the masthead font), traced from its pixel
+       outline (public/fonts/alagard.ttf, 1 px = 64 font units) and drawn 2x,
+       slightly emboldened with a same-color stroke (grows evenly, so it stays
+       centered), on a transparent background. The game's accent red with a
+       black outline a bit over one H-pixel thick (the wider-stroked copy
+       behind it; its outer edge sets the icon's overall size), so it reads
+       on both light and dark tab bars. -->
+  <path transform="translate(7 4) scale(2)" shape-rendering="crispEdges" fill="#1c1a14" stroke="#1c1a14" stroke-width="2.5" stroke-linejoin="miter" d="M8 11H6V6H3V11H1V3H0V2H1V1H2V0H3V5H6V1H7V0H8V9H9V10H8Z"/>
+  <path transform="translate(7 4) scale(2)" shape-rendering="crispEdges" fill="#b2231b" stroke="#b2231b" stroke-width="0.25" stroke-linejoin="miter" d="M8 11H6V6H3V11H1V3H0V2H1V1H2V0H3V5H6V1H7V0H8V9H9V10H8Z"/>
 </svg>
