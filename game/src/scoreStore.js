@@ -38,3 +38,12 @@ export function saveScore(roundId, total) {
     // state), it just won't be remembered.
   }
 }
+
+// Dev tool (beta panel): forget every saved score.
+export function clearScores() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Nothing stored to clear.
+  }
+}

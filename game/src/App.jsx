@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import FrontPage from './FrontPage.jsx';
 import { loadGameData } from './loadRounds.js';
 import RoundPlayer from './RoundPlayer.jsx';
-import { loadScores, saveScore } from './scoreStore.js';
+import { clearScores, loadScores, saveScore } from './scoreStore.js';
 import Settings from './Settings.jsx';
 import './App.css';
 
@@ -48,7 +48,22 @@ export default function App() {
       />
 
       <section className="beta-section pixel-frame">
-        <h2>Beta access &mdash; all issues</h2>
+        <div className="beta-head">
+          <h2>Beta access &mdash; all issues</h2>
+          {/* Dev tool: goes away with the rest of this beta panel. */}
+          <button
+            type="button"
+            className="beta-reset"
+            disabled={Object.keys(completedTotals).length === 0}
+            onClick={() => {
+              if (!window.confirm('Reset all saved scores?')) return;
+              clearScores();
+              setCompletedTotals({});
+            }}
+          >
+            Reset all scores
+          </button>
+        </div>
         <p className="beta-note">
           Every scheduled issue, playable in any order. This list won't exist in the shipped game
           (which only ever unlocks today's issue) &mdash; it's here so pools can be played through
