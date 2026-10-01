@@ -7,9 +7,10 @@ const MONTH_ABBREV = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Au
 // day boundary is fixed UTC). Parsed manually rather than via `new
 // Date(dateString)` + local-time formatting, which can display the wrong
 // calendar day in a negative-UTC-offset timezone.
-export function formatPlayDate(date) {
+// { showYear: false } gives just "Oct. 1".
+export function formatPlayDate(date, { showYear = true } = {}) {
   if (!date) return '';
   const [year, month, day] = date.split('-').map(Number);
   const monthName = MONTH_ABBREV[month - 1] ?? '';
-  return `${monthName} ${day}, ${year}`;
+  return showYear ? `${monthName} ${day}, ${year}` : `${monthName} ${day}`;
 }

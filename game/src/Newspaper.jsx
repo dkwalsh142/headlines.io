@@ -32,13 +32,15 @@ const FILLER_PARAGRAPHS_SHORT = { minParagraphs: 1, maxParagraphs: 1, minSentenc
 const TWO_STORY_CHANCE = 0.5;
 
 // `issueLabel` overrides the masthead's "No. {issueNumber}"; `fixedLeadPosition`
-// (0-2) pins the headline column instead of randomizing it.
+// (0-2) pins the headline column instead of randomizing it; `showYear={false}`
+// drops the year from the masthead date.
 export default function Newspaper({
   seed,
   section,
   issueNumber,
   issueLabel,
   fixedLeadPosition,
+  showYear = true,
   date,
   title,
   lead,
@@ -95,7 +97,7 @@ export default function Newspaper({
         title={title}
         left={issueLabel ?? `No. ${issueNumber}`}
         center={SECTION_LABEL[section] ?? section}
-        right={formatPlayDate(date)}
+        right={formatPlayDate(date, { showYear })}
       />
 
       <div className="np-body" style={{ gridTemplateColumns }}>

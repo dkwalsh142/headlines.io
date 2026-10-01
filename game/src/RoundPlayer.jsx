@@ -207,6 +207,9 @@ export default function RoundPlayer({ round: issue, onScore, onComplete, onExit 
                 section={headline.section}
                 issueNumber={index + 1}
                 date={issue.date}
+                // Month and day only: the current year next to the headline
+                // would be a nudge toward guessing it.
+                showYear={false}
                 title="The Daily Headlines"
                 lead={
                   <p className="headline-text">
