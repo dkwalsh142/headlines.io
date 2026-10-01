@@ -1,7 +1,11 @@
 // Completed-issue scores, persisted to localStorage so they survive reloads.
 // One entry per issue: replaying an issue (allowed for now) overwrites it
-// with the newest score. Stored as { [roundId]: { total, playedAt } } so a
-// play date is on hand if we later want history or streaks.
+// with the newest score. Stored as
+//   { [roundId]: { total, date, playedAt, firstPlayedAt,
+//                  results: [{ headlineId, section, guessYear, year, points }] } }
+// — `date` is the issue's own date and `firstPlayedAt` survives replays, so
+// stats.js can tell whether an issue was played on its day (for streaks).
+// Entries saved before stats existed have only { total, playedAt }.
 //
 // Per-browser only (like settings): cleared site data, private windows, and
 // other devices won't see it. Same-day comparison across players needs the
@@ -28,10 +32,23 @@ export function loadScores() {
   return totals;
 }
 
-export function saveScore(roundId, total) {
+// Every saved entry, for the Stats page.
+export function loadScoreEntries() {
+  return loadAll();
+}
+
+export function saveScore(roundId, total, { date, results } = {}) {
   try {
     const all = loadAll();
-    all[roundId] = { total, playedAt: new Date().toISOString() };
+    const now = new Date().toISOString();
+    const previous = all[roundId];
+    all[roundId] = {
+      total,
+      date,
+      playedAt: now,
+      firstPlayedAt: previous?.firstPlayedAt ?? previous?.playedAt ?? now,
+      results,
+    };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   } catch {
     // Storage unavailable: the score still shows for this session (App

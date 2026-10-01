@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { decodeAnswer } from './answerCodec.js';
+import HeaderFade from './HeaderFade.jsx';
 import Newspaper from './Newspaper.jsx';
+import { PAPER_SLIDE } from './paperSlide.js';
+import PixelArrow from './PixelArrow.jsx';
 import { clearProgress, loadProgress, saveProgress } from './progressStore.js';
 import ResultsPaper from './ResultsPaper.jsx';
 import StampText, { STAMP_DURATION, stampDuration, useStampEnabled } from './StampText.jsx';
@@ -38,7 +41,7 @@ function restoreProgress(issue) {
   };
 }
 
-// onScore(total) fires as soon as the issue is finished (so the score is kept
+// onScore(total, results) fires as soon as the issue is finished (so the score is kept
 // even if the player exits from the results page); onComplete is the results
 // page's Continue button.
 export default function RoundPlayer({ round: issue, onScore, onComplete, onExit }) {
@@ -78,7 +81,7 @@ export default function RoundPlayer({ round: issue, onScore, onComplete, onExit 
   function next() {
     if (index + 1 >= issue.headlines.length) {
       setPhase('issue_complete');
-      onScore?.(results.reduce((sum, r) => sum + r.points, 0));
+      onScore?.(results.reduce((sum, r) => sum + r.points, 0), results);
     } else {
       setIndex((i) => i + 1);
       setGuess('');
@@ -124,10 +127,7 @@ export default function RoundPlayer({ round: issue, onScore, onComplete, onExit 
         title="Submit (Enter)"
         disabled={isRevealing}
       >
-        {/* Pixel-art right arrow (→), drawn on a 9×7 grid to match the pixel font */}
-        <svg viewBox="0 0 9 7" width="36" height="28" shapeRendering="crispEdges" aria-hidden="true">
-          <path fill="currentColor" d="M0 3h6v1H0zM6 1h1v5H6zM7 2h1v3H7zM8 3h1v1H8z" />
-        </svg>
+        <PixelArrow />
       </button>
     </form>
   );
@@ -180,16 +180,20 @@ export default function RoundPlayer({ round: issue, onScore, onComplete, onExit 
     <div className="newspaper-stage">
       <div className="newspaper-stage-inner">
         <div className="round-player-head">
-          <span>{isComplete ? 'Issue complete' : `Headline ${index + 1} of ${issue.headlines.length}`}</span>
-          <button type="button" className="exit-btn" onClick={onExit} title="Exit issue">&times;</button>
+          {/* Fades with each page change; the X fades only on entering/leaving the round. */}
+          <HeaderFade swapKey={isComplete ? 'complete' : `headline-${index}`}>
+            <span>{isComplete ? 'Issue complete' : `Headline ${index + 1} of ${issue.headlines.length}`}</span>
+          </HeaderFade>
+          <HeaderFade swapKey="exit">
+            <button type="button" className="exit-btn" onClick={onExit} title="Exit issue">&times;</button>
+          </HeaderFade>
         </div>
 
-        <AnimatePresence mode="wait">
+        {/* propagate: when App removes this round, the current paper slides off first. */}
+        <AnimatePresence mode="wait" propagate>
           <motion.div
             key={isComplete ? 'results' : headline.id}
-            initial={{ x: '100%', opacity: 0, rotate: 15 }}
-            animate={{ x: 0, opacity: 1, rotate: 0, transition: { duration: 0.4, ease: 'easeOut' } }}
-            exit={{ x: '-100%', opacity: 0, rotate: -15, transition: { duration: 0.4, ease: 'easeIn' } }}
+            {...PAPER_SLIDE}
           >
             {isComplete ? (
               // The last headline's paper spins out and this one spins in,

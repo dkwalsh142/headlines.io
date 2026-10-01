@@ -402,7 +402,7 @@
 .fp-sections {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   border-top: 2px solid var(--ink);
   margin-top: 8px;
 }
@@ -418,6 +418,8 @@
   border-left: 2px solid var(--ink);
   padding: 12px 0 0 12px;
 }
+
+.fp-section + .fp-section:not(:last-child) { padding-right: 12px; }
 
 /* Real (clickable) headline, styled like an article headline with a rule
    under it; red on hover like the submit arrow. */
@@ -444,6 +446,9 @@
 .fp-section-head:hover,
 .fp-section-head:focus-visible { color: var(--accent); background: none; }
 
+/* Longer headline (Support the Developer), a touch smaller than the others. */
+.fp-section-head-long { font-size: 1.2rem; }
+
 /* Not a link yet (see SUPPORT_URL in FrontPage.jsx). */
 .fp-section-head.is-placeholder { cursor: default; }
 .fp-section-head.is-placeholder:hover { color: var(--ink); }
@@ -457,3 +462,285 @@
 }
 
 .fp-section-filler .np-filler-inner { padding: 8px 0 0; }
+
+/* --- Stats page (StatsPage.jsx) --- */
+
+/* Headline figures: one row of stat tiles, ruled apart like columns. */
+.sp-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0 24px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.sp-tile {
+  padding: 18px 8px 16px;
+  text-align: center;
+}
+.sp-tile + .sp-tile { border-left: 2px solid var(--ink); }
+
+/* Score tiles (average score, best score): their own two-up row, on top. */
+.sp-tiles-secondary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Where a vertical divider meets a full-width row rule, the rule stops a
+   little short on each side (--junction-gap) while the divider runs through
+   to meet it. Done with small masks: each divided cell paints a paper-colored
+   strip over the row rule beside its divider (keeping the divider's own 2px
+   in ink): tiles at the bottom (their row's rule); the charts' divider at
+   both ends. Only center-line dividers break a rule; the others simply
+   meet it, so each half of each row sits on one unbroken line. Desktop only; the
+   stacked mobile layout is ruled differently. */
+.stats-paper { --junction-gap: 6px; }
+
+.sp-tile,
+.sp-charts .sp-col { position: relative; }
+
+.sp-tile + .sp-tile::after,
+.sp-charts .sp-col + .sp-col::before,
+.sp-charts .sp-col + .sp-col::after {
+  content: '';
+  position: absolute;
+  left: calc(-2px - var(--junction-gap));
+  width: calc(2 * var(--junction-gap) + 2px);
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--card-bg) var(--junction-gap),
+    var(--ink) var(--junction-gap),
+    var(--ink) calc(var(--junction-gap) + 2px),
+    var(--card-bg) calc(var(--junction-gap) + 2px)
+  );
+  pointer-events: none;
+}
+
+.sp-tile + .sp-tile::after,
+.sp-charts .sp-col + .sp-col::after { bottom: -2px; }
+
+.sp-charts .sp-col + .sp-col::before { top: -2px; }
+
+/* The four-tile row's rule breaks only at the page's center divider: its
+   inner dividers (between tiles 1-2 and 3-4) just meet it, so each half
+   sits on one unbroken line. */
+.sp-tiles:not(.sp-tiles-secondary) .sp-tile:nth-child(even)::after { content: none; }
+
+.sp-tile-label {
+  font-family: var(--pixel-font);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.sp-tile-value {
+  font-family: var(--pixel-font);
+  font-size: 3rem;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.sp-tile-sub {
+  font-family: var(--pixel-font);
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+/* The two column charts side by side, equal halves. */
+.sp-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 24px;
+  border-bottom: 2px solid var(--ink);
+}
+
+/* Recent editions: full-width bottom row, newest first, one ruled cell
+   per edition (date over score), like the stat tiles. */
+.sp-recent {
+  margin: 0 24px 24px;
+  padding: 14px 0 16px;
+}
+
+.sp-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.sp-recent-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  font-family: var(--pixel-font);
+}
+.sp-recent-item + .sp-recent-item { border-left: 1px solid color-mix(in srgb, var(--ink) 25%, var(--card-bg)); }
+
+.sp-recent-date { font-size: 1rem; color: var(--muted); }
+.sp-recent-score { font-size: 1.5rem; color: var(--ink); }
+
+.sp-col {
+  padding: 14px 14px 16px;
+  min-width: 0;
+}
+.sp-col:first-child { padding-left: 0; }
+.sp-col:last-child { padding-right: 0; }
+.sp-col + .sp-col { border-left: 2px solid var(--ink); }
+
+.sp-head {
+  font-family: var(--headline-font);
+  font-size: 1.4rem;
+  font-weight: 400;
+  text-align: center;
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+  color: var(--ink);
+}
+
+.sp-caption,
+.sp-note {
+  font-family: var(--pixel-font);
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* Decade timeline: columns <=24px wide, growing up from one hairline
+   baseline, 4px rounded data-end (top), value on the cap in ink. Each
+   slot is its hover/focus/tap target, and the readout line under the
+   chart carries its details. Scrolls sideways rather than squashing when
+   there isn't room. */
+.sp-timeline { overflow-x: auto; }
+
+.sp-readout {
+  margin-top: 8px;
+  min-height: 1.3em;
+  font-family: var(--pixel-font);
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.sp-columns-chart {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(52px, 1fr);
+}
+
+/* Decade timeline on desktop: no scroll container, so the first diagonal
+   label can lean out into the page margin instead of needing padding, and
+   the columns spread nearly edge to edge (small, equal side padding). On
+   narrow screens it scrolls again, with room for that label (below). */
+.sp-timeline.is-narrow { overflow-x: visible; }
+
+.sp-columns-chart.is-narrow {
+  grid-auto-columns: minmax(26px, 1fr);
+  padding: 0 4px;
+}
+.sp-columns-chart.is-narrow .sp-column-value { font-size: 0.85rem; }
+
+/* Tighter around the thousands comma in column values (see tuckCommas). */
+.sp-comma { margin: 0 -0.12em; }
+
+/* Labels can be wider than their slot (every-other-decade labels, long
+   section names); this keeps the first and last from being clipped by
+   the scroll container. */
+.sp-columns-chart { padding: 0 8px; }
+
+.sp-column-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 4px;
+  outline: none;
+  cursor: default;
+}
+
+.sp-column-plot {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 160px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 35%, var(--card-bg));
+}
+
+.sp-column {
+  width: 24px;
+  min-height: 2px;
+  background: var(--accent);
+  border-radius: 4px 4px 0 0;
+}
+
+.sp-column-value {
+  font-family: var(--pixel-font);
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+/* Fixed-height label row in both charts, so the two charts (plot + labels
+   + readout) come out the same size side by side. */
+.sp-column-label {
+  position: relative;
+  width: 100%;
+  height: 54px; /* fits a diagonal decade label (~45px tall) */
+  font-family: var(--pixel-font);
+  font-size: 1rem;
+  color: var(--ink);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.sp-column-label-text {
+  display: inline-block;
+  padding-top: 4px;
+}
+
+/* Decade labels run diagonally, ending under their column, so all 13 fit. */
+.is-narrow .sp-column-label-text {
+  position: absolute;
+  top: 6px;
+  right: 50%;
+  padding-top: 0;
+  transform-origin: top right;
+  transform: rotate(-45deg);
+}
+
+.sp-column-slot.is-active .sp-column { box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--ink); }
+
+.sp-empty {
+  padding: 40px 24px 48px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 700px) {
+  .sp-tile + .sp-tile::after,
+  .sp-charts .sp-col + .sp-col::before,
+  .sp-charts .sp-col + .sp-col::after { content: none; }
+  .sp-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sp-tile:nth-child(odd) { border-left: none; }
+  .sp-tile:nth-child(n + 3) { border-top: 2px solid var(--ink); }
+  .sp-recent-list { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 8px; }
+  .sp-recent-item:nth-child(odd) { border-left: none; }
+  .sp-charts { grid-template-columns: minmax(0, 1fr); }
+  .sp-timeline.is-narrow { overflow-x: auto; }
+  .sp-columns-chart.is-narrow { padding: 0 20px; }
+  /* Room for full section names; the chart scrolls sideways if needed. */
+  .sp-columns-chart:not(.is-narrow) { grid-auto-columns: minmax(72px, 1fr); }
+  .sp-charts .sp-col + .sp-col { border-left: none; border-top: 2px solid var(--ink); }
+  .sp-col,
+  .sp-col:first-child,
+  .sp-col:last-child { padding: 14px 0 16px; }
+}

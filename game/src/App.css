@@ -22,6 +22,14 @@
 .text-btn:hover,
 .text-btn:focus-visible { color: var(--ink); background: none; }
 
+/* Pixel arrow inside a text button (e.g. Back): sits on the text's middle. */
+.back-arrow {
+  vertical-align: middle;
+  margin-right: 8px;
+  position: relative;
+  top: -2px;
+}
+
 /* --- Settings --- */
 
 .settings-section {
@@ -120,6 +128,14 @@
   font-size: 1.3rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  margin-bottom: 12px; /* breathing room above the paper (rounds and stats) */
+  min-height: 40px; /* same height whether it holds the X or Back, so every paper starts at the same spot */
+}
+
+/* Each side of the header row fades as a unit (HeaderFade.jsx). */
+.header-fade {
+  display: flex;
+  align-items: center;
 }
 
 .exit-btn {

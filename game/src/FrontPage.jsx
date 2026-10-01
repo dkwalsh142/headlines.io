@@ -7,8 +7,9 @@ import StampText from './StampText.jsx';
 // The home screen's "front page": the same newspaper as a round page, with
 // the lead story inviting the player into today's issue (or reporting their
 // score, if they've already played it this session). Fake story columns
-// either side, lead always centered. Under the play button, two small
-// "stories" side by side — Settings and Support the Developer — each a real
+// either side, lead always centered. Renders just the paper; App supplies the
+// page stage and header row around it (shared with the stats page). Under the play button, two small
+// "stories" side by side — Stats, Support the Developer, and Settings — each a real
 // headline over fake body text that fills whatever space is left.
 
 const HEADLINE_STAMP_STAGGER = 0.03; // matches the round pages' headlines
@@ -17,7 +18,7 @@ const HEADLINE_STAMP_STAGGER = 0.03; // matches the round pages' headlines
 // renders as plain, unclickable text.
 const SUPPORT_URL = null;
 
-export default function FrontPage({ todayRound, todayTotal, todayInProgress, onPlay, onSettings }) {
+export default function FrontPage({ todayRound, todayTotal, todayInProgress, onPlay, onStats, onSettings }) {
   const date = todayRound?.date ?? todayDateString();
   const played = todayTotal != null;
   const seed = `front-page-${date}`;
@@ -25,7 +26,7 @@ export default function FrontPage({ todayRound, todayTotal, todayInProgress, onP
   // Headline-less filler: just body text under each section's real headline.
   const sectionFiller = useMemo(
     () =>
-      ['settings', 'support'].map((key) => [
+      ['stats', 'settings', 'support'].map((key) => [
         {
           headline: null,
           paragraphs: makeFillerStories(`${seed}:${key}`, 1, FILLER_PARAGRAPHS)[0].paragraphs,
@@ -57,54 +58,60 @@ export default function FrontPage({ todayRound, todayTotal, todayInProgress, onP
   );
 
   return (
-    <div className="newspaper-stage">
-      <div className="newspaper-stage-inner">
-        <Newspaper
-          seed={seed}
-          className="front-page"
-          section="Front Page"
-          issueLabel="Today's Edition"
-          fixedLeadPosition={1}
-          date={date}
-          title="The Daily Headlines"
-          lead={
-            <p className="headline-text">
-              <StampText text={headline} stagger={HEADLINE_STAMP_STAGGER} />
-            </p>
-          }
-          guess={
-            <>
-              <div className="fp-body">{body}</div>
-              <div className="fp-sections">
-                <section className="fp-section">
-                  <div className="fp-section-title">
-                    <button type="button" className="fp-section-head" onClick={onSettings}>
-                      Settings
-                    </button>
-                  </div>
-                  <div className="fp-section-filler">
-                    <FillerLayer stories={sectionFiller[0]} />
-                  </div>
-                </section>
-                <section className="fp-section">
-                  <div className="fp-section-title">
-                    {SUPPORT_URL ? (
-                      <a className="fp-section-head" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
-                        Support the Developer
-                      </a>
-                    ) : (
-                      <h3 className="fp-section-head is-placeholder">Support the Developer</h3>
-                    )}
-                  </div>
-                  <div className="fp-section-filler">
-                    <FillerLayer stories={sectionFiller[1]} />
-                  </div>
-                </section>
+    <Newspaper
+      seed={seed}
+      className="front-page"
+      section="Front Page"
+      issueLabel="Today's Edition"
+      fixedLeadPosition={1}
+      date={date}
+      title="The Daily Headlines"
+      lead={
+        <p className="headline-text">
+          <StampText text={headline} stagger={HEADLINE_STAMP_STAGGER} />
+        </p>
+      }
+      guess={
+        <>
+          <div className="fp-body">{body}</div>
+          <div className="fp-sections">
+            <section className="fp-section">
+              <div className="fp-section-title">
+                <button type="button" className="fp-section-head" onClick={onStats}>
+                  Stats
+                </button>
               </div>
-            </>
-          }
-        />
-      </div>
-    </div>
+              <div className="fp-section-filler">
+                <FillerLayer stories={sectionFiller[0]} />
+              </div>
+            </section>
+            <section className="fp-section">
+              <div className="fp-section-title">
+                {SUPPORT_URL ? (
+                  <a className="fp-section-head fp-section-head-long" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+                    Support the Developer
+                  </a>
+                ) : (
+                  <h3 className="fp-section-head fp-section-head-long is-placeholder">Support the Developer</h3>
+                )}
+              </div>
+              <div className="fp-section-filler">
+                <FillerLayer stories={sectionFiller[2]} />
+              </div>
+            </section>
+            <section className="fp-section">
+              <div className="fp-section-title">
+                <button type="button" className="fp-section-head" onClick={onSettings}>
+                  Settings
+                </button>
+              </div>
+              <div className="fp-section-filler">
+                <FillerLayer stories={sectionFiller[1]} />
+              </div>
+            </section>
+          </div>
+        </>
+      }
+    />
   );
 }

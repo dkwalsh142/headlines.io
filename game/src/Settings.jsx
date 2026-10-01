@@ -1,4 +1,5 @@
 import { useSettings } from './SettingsContext.jsx';
+import PixelArrow from './PixelArrow.jsx';
 
 // Options screen, grouped into Visual and Audio sections. Each option is one
 // ToggleRow; add future ones to the right section here alongside a new key
@@ -12,7 +13,8 @@ export default function Settings({ onBack }) {
       <div className="page-head">
         <h1>Settings</h1>
         <button type="button" className="text-btn" onClick={onBack}>
-          &larr; Back
+          <PixelArrow direction="left" unit={2} className="back-arrow" />
+          Back
         </button>
       </div>
 
