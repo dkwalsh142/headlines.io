@@ -12,13 +12,12 @@ import Settings from './Settings.jsx';
 import StatsPage from './StatsPage.jsx';
 import './App.css';
 
-// Beta panel in/out, on the same 0.4s rhythm as the papers' slide. `delay`
-// holds the fade-in until an outgoing paper has finished sliding off.
-const betaFade = (delay) => ({
+// Beta panel in/out alongside the papers' slide.
+const BETA_FADE = {
   initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.6, ease: 'easeOut', delay } },
+  animate: { opacity: 1, transition: { duration: 0.6, ease: 'easeOut' } },
   exit: { opacity: 0, transition: { duration: 0.6, ease: 'easeIn' } },
-});
+};
 
 export default function App() {
   const [data, setData] = useState(null);
@@ -33,13 +32,21 @@ export default function App() {
   // True until the first home view has mounted: the front page appears without
   // sliding in on page load, but slides in when returning from a round.
   const isFirstHome = useRef(true);
-  // Whether stats was showing as of the last render: on the render that
-  // closes stats it's still true, so the beta panel knows to wait for the
-  // stats paper to slide off before fading back in.
-  const wasShowingStats = useRef(showStats);
-  useEffect(() => {
-    wasShowingStats.current = showStats;
-  }, [showStats]);
+  // The beta panel only exists on the front page. It goes as soon as stats
+  // opens, but only comes back once the stats paper has fully slid off (see
+  // onExitComplete below), so it never sits under the outgoing stats paper
+  // and then drops when the taller front page arrives.
+  const [showBeta, setShowBeta] = useState(true);
+  // Opening stats holds the paper area at the front page's height until the
+  // stats paper has slid in: the beta panel below fades out in place instead
+  // of jumping up under a shorter stats paper mid-fade.
+  const stageRef = useRef(null);
+  const [stageMinHeight, setStageMinHeight] = useState(null);
+  function openStats() {
+    setStageMinHeight(stageRef.current?.offsetHeight ?? null);
+    setShowBeta(false);
+    setShowStats(true);
+  }
   useEffect(() => {
     if (data) isFirstHome.current = false; // after the first render that shows home
   }, [data]);
@@ -97,7 +104,7 @@ export default function App() {
             on the front page, "Your stats" + Back on stats) while the papers
             swap with the same slide/spin as the headline pages. */}
         <div className="newspaper-stage">
-          <div className="newspaper-stage-inner">
+          <div className="newspaper-stage-inner" ref={stageRef} style={{ minHeight: stageMinHeight ?? undefined }}>
             <div className="round-player-head">
               <HeaderFade swapKey={showStats ? 'stats' : 'front'}>
                 {showStats && <span>Your stats</span>}
@@ -111,8 +118,19 @@ export default function App() {
                 )}
               </HeaderFade>
             </div>
-            <AnimatePresence mode="wait" initial={!isFirstHome.current} propagate>
-              <motion.div key={showStats ? 'stats' : 'front'} {...PAPER_SLIDE}>
+            <AnimatePresence
+              mode="wait"
+              initial={!isFirstHome.current}
+              propagate
+              // Stats paper gone (heading back to the front page): bring the beta panel back.
+              onExitComplete={() => !showStats && setShowBeta(true)}
+            >
+              <motion.div
+                key={showStats ? 'stats' : 'front'}
+                {...PAPER_SLIDE}
+                // Release the held height once the stats paper has landed.
+                onAnimationComplete={() => showStats && setStageMinHeight(null)}
+              >
                 {showStats ? (
                   <StatsPage totalIssues={data.allRounds.length} />
                 ) : (
@@ -121,7 +139,7 @@ export default function App() {
                     todayTotal={data.todayRound ? completedTotals[data.todayRound.id] : undefined}
                     todayInProgress={data.todayRound ? inProgressIds.has(data.todayRound.id) : false}
                     onPlay={() => setActiveRound(data.todayRound)}
-                    onStats={() => setShowStats(true)}
+                    onStats={openStats}
                     onSettings={() => setShowSettings(true)}
                   />
                 )}
@@ -133,11 +151,11 @@ export default function App() {
         {/* Fades out whenever the main screen is left (to stats, settings, or a
             round) and back in on return; not on first load. */}
         <AnimatePresence initial={!isFirstHome.current} propagate>
-          {!showStats && (
+          {showBeta && (
             <motion.section
               key="beta"
               className="beta-section pixel-frame"
-              {...betaFade(wasShowingStats.current ? 0.4 : 0)}
+              {...BETA_FADE}
             >
               <div className="beta-head">
                 <h2>Beta access &mdash; all issues</h2>
